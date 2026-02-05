@@ -23,4 +23,4 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Run on your WiFi IP to match Postman
-app.Run("http://192.168.1.86:5000");
+app.Run("http://0.0.0.0:5000");
