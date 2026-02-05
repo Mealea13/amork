@@ -1,0 +1,88 @@
+{
+	"info": {
+		"name": "Amork App",
+		"description": "Full collection for Auth and Food CRUD operations.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"loopy@gmail.com\",\n    \"password\": \"Mealea13042004\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/auth/login" }
+					}
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullname\": \"Mr. Sokpheng\",\n    \"email\": \"loopy@gmail.com\",\n    \"password\": \"Mealea13042004\",\n    \"phone\": \"+855 12345678\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/auth/register" }
+					}
+				}
+			]
+		},
+		{
+			"name": "Foods",
+			"item": [
+				{
+					"name": "Get Popular Foods (Read)",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{base_url}}/api/foods/popular" }
+					}
+				},
+				{
+					"name": "Add New Food (Create)",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"food_name\": \"Beef Lok Lak\",\n    \"price\": 5.50,\n    \"calories\": 350,\n    \"cooking_time\": \"20 min\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/foods" }
+					}
+				},
+				{
+					"name": "Update Food (Edit)",
+					"request": {
+						"method": "PUT",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"food_name\": \"Updated Fish Amork\",\n    \"price\": 7.00\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/foods/1" }
+					}
+				},
+				{
+					"name": "Remove Food (Delete)",
+					"request": {
+						"method": "DELETE",
+						"url": { "raw": "{{base_url}}/api/foods/1" }
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://192.168.1.86:5000",
+			"type": "string"
+		}
+	]
+}
