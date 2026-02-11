@@ -16,11 +16,11 @@ var app = builder.Build();
 // app.UseHttpsRedirection();
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AmorkDbContext>();
-    db.Database.EnsureCreated(); // This creates the database and tables if they don't exist!
-}
+// using (var scope = app.Services.CreateScope())
+// {
+//     var db = scope.ServiceProvider.GetRequiredService<AmorkDbContext>();
+//     db.Database.EnsureCreated(); // This creates the database and tables if they don't exist!
+// }
 
 // Run on your WiFi IP to match Postman
-app.Run("http://192.168.1.86:5000");
+app.Run("http://0.0.0.0:5000");

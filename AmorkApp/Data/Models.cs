@@ -1,41 +1,37 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace AmorkApp.Data; // This must match exactly
+namespace AmorkApp.Models;
 
 [Table("users")]
 public class User
 {
     [Key]
     [Column("user_id")]
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
 
     [Column("fullname")]
+    [JsonPropertyName("fullname")]
     public string? Fullname { get; set; }
 
     [Column("email")]
+    [JsonPropertyName("email")]
     public string Email { get; set; } = string.Empty;
 
     [Column("password_text")]
+    [JsonPropertyName("passwordText")]
     public string PasswordText { get; set; } = string.Empty;
-}
 
-[Table("foods")]
-public class Food
-{
-    [Key]
-    [Column("food_id")]
-    public int FoodId { get; set; }
+    [Column("phone")]
+    [JsonPropertyName("phone")]
+    public string? Phone { get; set; }
 
-    [JsonPropertyName("food_name")]
-    [Column("food_name")]
-    public string FoodName { get; set; } = string.Empty;
+    [Column("member_type")]
+    [JsonPropertyName("memberType")]
+    public string? MemberType { get; set; }
 
-    [Column("price")]
-    public decimal Price { get; set; }
-
-    [JsonPropertyName("cooking_time")]
-    [Column("cooking_time")]
-    public string? CookingTime { get; set; }
+    [Column("create_at")] // Matches DB naming convention
+    public DateTime? CreateAt { get; set; }
 }
