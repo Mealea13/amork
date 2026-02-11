@@ -1,87 +1,2103 @@
 {
 	"info": {
+		"_postman_id": "amork-food-order-app",
 		"name": "Amork App",
-		"description": "Full collection for Auth and Food CRUD operations.",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"description": "Complete API collection for Amork Food Order mobile app (Flutter)\n\nFeatures:\n- Authentication (Login, Register, Google OAuth)\n- Categories Management (CRUD)\n- Foods Management (CRUD)\n- Cart Operations\n- Order Management\n- Payment Processing\n- User Profile (CRUD)\n- Notifications",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"version": "2.0.0"
 	},
 	"item": [
 		{
-			"name": "Auth",
+			"name": "🔐 Authentication",
+			"description": "User authentication endpoints including login, register, and OAuth",
 			"item": [
 				{
-					"name": "Login",
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.environment.set('auth_token', jsonData.token);",
+									"    pm.environment.set('user_id', jsonData.user.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullname\": \"Him Somnisa\",\n    \"email\": \"loopy@gmail.com\",\n    \"password\": \"Mealea13042004\",\n    \"phone\": \"+855 987710045\",\n    \"member_type\": \"regular\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						},
+						"description": "Register a new user account with email, password, full name, and phone number"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.environment.set('auth_token', jsonData.token);",
+									"    pm.environment.set('user_id', jsonData.user.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"email\": \"loopy@gmail.com\",\n    \"password\": \"Mealea13042004\"\n}",
-							"options": { "raw": { "language": "json" } }
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
-						"url": { "raw": "{{base_url}}/api/auth/login" }
-					}
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						},
+						"description": "Login with email and password to get authentication token"
+					},
+					"response": []
 				},
 				{
-					"name": "Register",
+					"name": "Google OAuth Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.environment.set('auth_token', jsonData.token);",
+									"    pm.environment.set('user_id', jsonData.user.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"fullname\": \"Mr. Sokpheng\",\n    \"email\": \"loopy@gmail.com\",\n    \"password\": \"Mealea13042004\",\n    \"phone\": \"+855 12345678\"\n}",
-							"options": { "raw": { "language": "json" } }
+							"raw": "{\n    \"id_token\": \"google_oauth_id_token_here\",\n    \"access_token\": \"google_oauth_access_token_here\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
-						"url": { "raw": "{{base_url}}/api/auth/register" }
-					}
+						"url": {
+							"raw": "{{base_url}}/api/auth/google",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "google"]
+						},
+						"description": "Authenticate using Google OAuth credentials"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "logout"]
+						},
+						"description": "Logout current user and invalidate token"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/refresh",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "refresh"]
+						},
+						"description": "Refresh authentication token"
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"loopy@gmail.com\",\n    \"verification_code\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/verify-email",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "verify-email"]
+						},
+						"description": "Verify user email with verification code"
+					},
+					"response": []
 				}
 			]
 		},
 		{
-			"name": "Foods",
+			"name": "📂 Categories",
+			"description": "CRUD operations for food categories (Food, Drink, Snack, Dessert)",
 			"item": [
 				{
-					"name": "Get Popular Foods (Read)",
+					"name": "Get All Categories",
 					"request": {
 						"method": "GET",
-						"url": { "raw": "{{base_url}}/api/foods/popular" }
-					}
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories"]
+						},
+						"description": "Retrieve all categories (Food, Drink, Snack, Dessert)"
+					},
+					"response": []
 				},
 				{
-					"name": "Add New Food (Create)",
+					"name": "Get Category by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/categories/{{category_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories", "{{category_id}}"]
+						},
+						"description": "Get specific category details by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category",
 					"request": {
 						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"food_name\": \"Beef Lok Lak\",\n    \"price\": 5.50,\n    \"calories\": 350,\n    \"cooking_time\": \"20 min\"\n}",
-							"options": { "raw": { "language": "json" } }
+							"raw": "{\n    \"name\": \"Food\",\n    \"description\": \"Delicious Cambodian main dishes\",\n    \"icon\": \"food_icon.png\",\n    \"color\": \"#FF6B6B\",\n    \"display_order\": 1,\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
-						"url": { "raw": "{{base_url}}/api/foods" }
-					}
+						"url": {
+							"raw": "{{base_url}}/api/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories"]
+						},
+						"description": "Create a new category"
+					},
+					"response": []
 				},
 				{
-					"name": "Update Food (Edit)",
+					"name": "Update Category",
 					"request": {
 						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"food_name\": \"Updated Fish Amork\",\n    \"price\": 7.00\n}",
-							"options": { "raw": { "language": "json" } }
+							"raw": "{\n    \"name\": \"Drinks\",\n    \"description\": \"Refreshing beverages and drinks\",\n    \"icon\": \"drink_icon.png\",\n    \"color\": \"#4ECDC4\",\n    \"display_order\": 2,\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
-						"url": { "raw": "{{base_url}}/api/foods/1" }
-					}
+						"url": {
+							"raw": "{{base_url}}/api/categories/{{category_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories", "{{category_id}}"]
+						},
+						"description": "Update existing category"
+					},
+					"response": []
 				},
 				{
-					"name": "Remove Food (Delete)",
+					"name": "Delete Category",
 					"request": {
 						"method": "DELETE",
-						"url": { "raw": "{{base_url}}/api/foods/1" }
-					}
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/categories/{{category_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories", "{{category_id}}"]
+						},
+						"description": "Delete a category"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Items by Category",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/categories/{{category_id}}/items?page=1&limit=20",
+							"host": ["{{base_url}}"],
+							"path": ["api", "categories", "{{category_id}}", "items"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						},
+						"description": "Get all items in a specific category with pagination"
+					},
+					"response": []
 				}
 			]
+		},
+		{
+			"name": "🍽️ Foods/Items",
+			"description": "CRUD operations for food items across all categories",
+			"item": [
+				{
+					"name": "Get All Foods",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/foods?page=1&limit=20&category=food&search=",
+							"host": ["{{base_url}}"],
+							"path": ["api", "foods"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page"
+								},
+								{
+									"key": "category",
+									"value": "food",
+									"description": "Filter by category"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Search by name"
+								}
+							]
+						},
+						"description": "Get all food items with pagination and filters"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Popular Foods",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/foods/popular?limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "foods", "popular"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get popular/trending food items for main page"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Food by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/foods/{{food_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "foods", "{{food_id}}"]
+						},
+						"description": "Get detailed information about a specific food item"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Food Item",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"food_name\": \"Cambodia Fish Amork\",\n    \"category_id\": 1,\n    \"description\": \"Traditional Cambodian fish dish with coconut cream\",\n    \"price\": 6.00,\n    \"calories\": 350,\n    \"cooking_time\": \"25 min\",\n    \"image_url\": \"fish_amork.jpg\",\n    \"rating\": 4.8,\n    \"is_popular\": true,\n    \"is_available\": true,\n    \"ingredients\": [\n        {\n            \"name\": \"Fish\",\n            \"quantity\": \"200g\",\n            \"is_required\": true\n        },\n        {\n            \"name\": \"Coconut Cream\",\n            \"quantity\": \"100ml\",\n            \"is_required\": true\n        },\n        {\n            \"name\": \"Lemongrass\",\n            \"quantity\": \"2 stalks\",\n            \"is_required\": false\n        }\n    ],\n    \"additional_ingredients\": [\n        {\n            \"name\": \"Extra Fish\",\n            \"price\": 1.50\n        },\n        {\n            \"name\": \"Vegetables\",\n            \"price\": 0.50\n        }\n    ],\n    \"tags\": [\"traditional\", \"spicy\", \"popular\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/foods",
+							"host": ["{{base_url}}"],
+							"path": ["api", "foods"]
+						},
+						"description": "Add a new food item with ingredients and additional options"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Food Item",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"food_name\": \"Cambodia Fish Amork - Updated\",\n    \"price\": 6.50,\n    \"description\": \"Traditional Cambodian fish dish with rich coconut cream\",\n    \"is_available\": true,\n    \"rating\": 4.9\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/foods/{{food_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "foods", "{{food_id}}"]
+						},
+						"description": "Update existing food item"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Food Item",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/foods/{{food_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "foods", "{{food_id}}"]
+						},
+						"description": "Delete a food item"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Foods",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/foods/search?q=fish&category=food",
+							"host": ["{{base_url}}"],
+							"path": ["api", "foods", "search"],
+							"query": [
+								{
+									"key": "q",
+									"value": "fish"
+								},
+								{
+									"key": "category",
+									"value": "food"
+								}
+							]
+						},
+						"description": "Search for food items by name or description"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🛒 Cart",
+			"description": "Shopping cart operations",
+			"item": [
+				{
+					"name": "Get Cart",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/cart",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cart"]
+						},
+						"description": "Get current user's cart with all items"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Item to Cart",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"food_id\": 1,\n    \"quantity\": 2,\n    \"additional_ingredients\": [\n        {\n            \"ingredient_id\": 1,\n            \"name\": \"Extra Fish\",\n            \"price\": 1.50\n        },\n        {\n            \"ingredient_id\": 2,\n            \"name\": \"Vegetables\",\n            \"price\": 0.50\n        }\n    ],\n    \"special_instructions\": \"Less spicy please\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/cart/add",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cart", "add"]
+						},
+						"description": "Add food item to cart with quantity and additional ingredients"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Cart Item",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantity\": 3,\n    \"additional_ingredients\": [\n        {\n            \"ingredient_id\": 1,\n            \"name\": \"Extra Fish\",\n            \"price\": 1.50\n        }\n    ],\n    \"special_instructions\": \"Medium spicy\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/cart/{{cart_item_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cart", "{{cart_item_id}}"]
+						},
+						"description": "Update quantity or ingredients of item in cart"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Item from Cart",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/cart/{{cart_item_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cart", "{{cart_item_id}}"]
+						},
+						"description": "Remove specific item from cart"
+					},
+					"response": []
+				},
+				{
+					"name": "Clear Cart",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/cart/clear",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cart", "clear"]
+						},
+						"description": "Remove all items from cart"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Cart Total",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/cart/total",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cart", "total"]
+						},
+						"description": "Calculate total price of all items in cart"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📦 Orders",
+			"description": "Order management and tracking",
+			"item": [
+				{
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payment_method\": \"cash_on_delivery\",\n    \"delivery_address\": {\n        \"street\": \"Street 123\",\n        \"city\": \"Phnom Penh\",\n        \"district\": \"Chamkar Mon\",\n        \"postal_code\": \"12000\"\n    },\n    \"phone\": \"+855 987710045\",\n    \"note\": \"Please ring the bell twice\",\n    \"items\": [\n        {\n            \"food_id\": 1,\n            \"quantity\": 2,\n            \"price\": 6.00,\n            \"additional_ingredients\": [\n                {\n                    \"name\": \"Extra Fish\",\n                    \"price\": 1.50\n                }\n            ]\n        }\n    ],\n    \"subtotal\": 15.00,\n    \"delivery_fee\": 1.00,\n    \"tax\": 0.80,\n    \"total\": 16.80\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders"]
+						},
+						"description": "Create new order from cart items"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/orders?status=all&page=1&limit=20",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders"],
+							"query": [
+								{
+									"key": "status",
+									"value": "all",
+									"description": "pending, confirmed, preparing, ready, delivered, cancelled"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						},
+						"description": "Get user's order history with filters"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/orders/{{order_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "{{order_id}}"]
+						},
+						"description": "Get detailed information about a specific order"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"preparing\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders/{{order_id}}/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "{{order_id}}", "status"]
+						},
+						"description": "Update order status (Admin/Restaurant)"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reason\": \"Changed my mind\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders/{{order_id}}/cancel",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "{{order_id}}", "cancel"]
+						},
+						"description": "Cancel an order (only if status is pending or confirmed)"
+					},
+					"response": []
+				},
+				{
+					"name": "Track Order",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/orders/{{order_id}}/track",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "{{order_id}}", "track"]
+						},
+						"description": "Get real-time order tracking information"
+					},
+					"response": []
+				},
+				{
+					"name": "Rate Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 5,\n    \"review\": \"Excellent food and fast delivery!\",\n    \"food_ratings\": [\n        {\n            \"food_id\": 1,\n            \"rating\": 5\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders/{{order_id}}/rate",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "{{order_id}}", "rate"]
+						},
+						"description": "Rate completed order and food items"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "💳 Payment",
+			"description": "Payment processing endpoints",
+			"item": [
+				{
+					"name": "Process Cash Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order_id\": \"{{order_id}}\",\n    \"payment_method\": \"cash_on_delivery\",\n    \"amount\": 16.80\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/payment/cash",
+							"host": ["{{base_url}}"],
+							"path": ["api", "payment", "cash"]
+						},
+						"description": "Process cash on delivery payment"
+					},
+					"response": []
+				},
+				{
+					"name": "Generate QR Code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order_id\": \"{{order_id}}\",\n    \"amount\": 16.80,\n    \"payment_method\": \"qr_code\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/payment/qr-code/generate",
+							"host": ["{{base_url}}"],
+							"path": ["api", "payment", "qr-code", "generate"]
+						},
+						"description": "Generate QR code for payment"
+					},
+					"response": []
+				},
+				{
+					"name": "Verify QR Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order_id\": \"{{order_id}}\",\n    \"transaction_id\": \"QR123456789\",\n    \"payment_proof\": \"base64_encoded_screenshot\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/payment/qr-code/verify",
+							"host": ["{{base_url}}"],
+							"path": ["api", "payment", "qr-code", "verify"]
+						},
+						"description": "Verify QR code payment completion"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Payment Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/payment/{{payment_id}}/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "payment", "{{payment_id}}", "status"]
+						},
+						"description": "Check payment status"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Payment Methods",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/payment/methods",
+							"host": ["{{base_url}}"],
+							"path": ["api", "payment", "methods"]
+						},
+						"description": "Get available payment methods"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Payment History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/payment/history?page=1&limit=20",
+							"host": ["{{base_url}}"],
+							"path": ["api", "payment", "history"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						},
+						"description": "Get user's payment history"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "👤 User Profile",
+			"description": "User profile management (CRUD)",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "profile"]
+						},
+						"description": "Get current user profile information"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullname\": \"Him Somnisa\",\n    \"phone\": \"+855 987710045\",\n    \"email\": \"loopy@gmail.com\",\n    \"member_type\": \"premium\",\n    \"profile_image\": \"avatar.jpg\",\n    \"date_of_birth\": \"2004-04-13\",\n    \"gender\": \"female\",\n    \"address\": {\n        \"street\": \"Street 123\",\n        \"city\": \"Phnom Penh\",\n        \"district\": \"Chamkar Mon\",\n        \"postal_code\": \"12000\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "profile"]
+						},
+						"description": "Update user profile information"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile Picture",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "profile_image",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/profile/picture",
+							"host": ["{{base_url}}"],
+							"path": ["api", "profile", "picture"]
+						},
+						"description": "Upload/update profile picture"
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"current_password\": \"Mealea13042004\",\n    \"new_password\": \"NewPassword123!\",\n    \"confirm_password\": \"NewPassword123!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/profile/change-password",
+							"host": ["{{base_url}}"],
+							"path": ["api", "profile", "change-password"]
+						},
+						"description": "Change user password"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Account",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\": \"Mealea13042004\",\n    \"reason\": \"No longer needed\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/profile/delete",
+							"host": ["{{base_url}}"],
+							"path": ["api", "profile", "delete"]
+						},
+						"description": "Delete user account permanently"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Saved Addresses",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/profile/addresses",
+							"host": ["{{base_url}}"],
+							"path": ["api", "profile", "addresses"]
+						},
+						"description": "Get user's saved delivery addresses"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Address",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"label\": \"Home\",\n    \"street\": \"Street 123\",\n    \"city\": \"Phnom Penh\",\n    \"district\": \"Chamkar Mon\",\n    \"postal_code\": \"12000\",\n    \"is_default\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/profile/addresses",
+							"host": ["{{base_url}}"],
+							"path": ["api", "profile", "addresses"]
+						},
+						"description": "Add new delivery address"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Address",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"label\": \"Office\",\n    \"street\": \"Street 456\",\n    \"city\": \"Phnom Penh\",\n    \"district\": \"Daun Penh\",\n    \"postal_code\": \"12200\",\n    \"is_default\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/profile/addresses/{{address_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "profile", "addresses", "{{address_id}}"]
+						},
+						"description": "Update saved address"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Address",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/profile/addresses/{{address_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "profile", "addresses", "{{address_id}}"]
+						},
+						"description": "Delete saved address"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🔔 Notifications",
+			"description": "Push notifications and alerts",
+			"item": [
+				{
+					"name": "Get All Notifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications?page=1&limit=20&is_read=false",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notifications"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "is_read",
+									"value": "false"
+								}
+							]
+						},
+						"description": "Get user's notifications with pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/unread-count",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notifications", "unread-count"]
+						},
+						"description": "Get count of unread notifications"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark as Read",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/{{notification_id}}/read",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notifications", "{{notification_id}}", "read"]
+						},
+						"description": "Mark specific notification as read"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark All as Read",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/mark-all-read",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notifications", "mark-all-read"]
+						},
+						"description": "Mark all notifications as read"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Notification",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/notifications/{{notification_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notifications", "{{notification_id}}"]
+						},
+						"description": "Delete specific notification"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Notification Settings",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order_updates\": true,\n    \"promotions\": true,\n    \"new_items\": false,\n    \"push_enabled\": true,\n    \"email_enabled\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/notifications/settings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notifications", "settings"]
+						},
+						"description": "Update notification preferences"
+					},
+					"response": []
+				},
+				{
+					"name": "Register Device Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"device_token\": \"fcm_device_token_here\",\n    \"device_type\": \"android\",\n    \"device_name\": \"Samsung Galaxy S21\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/notifications/device-token",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notifications", "device-token"]
+						},
+						"description": "Register device token for push notifications"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "⭐ Favorites",
+			"description": "Manage favorite food items",
+			"item": [
+				{
+					"name": "Get Favorites",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/favorites",
+							"host": ["{{base_url}}"],
+							"path": ["api", "favorites"]
+						},
+						"description": "Get user's favorite food items"
+					},
+					"response": []
+				},
+				{
+					"name": "Add to Favorites",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"food_id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/favorites",
+							"host": ["{{base_url}}"],
+							"path": ["api", "favorites"]
+						},
+						"description": "Add food item to favorites"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove from Favorites",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/favorites/{{food_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "favorites", "{{food_id}}"]
+						},
+						"description": "Remove food item from favorites"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🎫 Promotions & Coupons",
+			"description": "Promotional offers and discount coupons",
+			"item": [
+				{
+					"name": "Get Active Promotions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/promotions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "promotions"]
+						},
+						"description": "Get all active promotions and offers"
+					},
+					"response": []
+				},
+				{
+					"name": "Validate Coupon",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"coupon_code\": \"SAVE20\",\n    \"order_total\": 16.80\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/promotions/validate-coupon",
+							"host": ["{{base_url}}"],
+							"path": ["api", "promotions", "validate-coupon"]
+						},
+						"description": "Validate coupon code and get discount amount"
+					},
+					"response": []
+				},
+				{
+					"name": "Apply Coupon",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"coupon_code\": \"SAVE20\",\n    \"order_id\": \"{{order_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/promotions/apply-coupon",
+							"host": ["{{base_url}}"],
+							"path": ["api", "promotions", "apply-coupon"]
+						},
+						"description": "Apply coupon to order"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Coupons",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/promotions/my-coupons",
+							"host": ["{{base_url}}"],
+							"path": ["api", "promotions", "my-coupons"]
+						},
+						"description": "Get user's available coupons"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "💬 Reviews & Ratings",
+			"description": "Food and order reviews",
+			"item": [
+				{
+					"name": "Get Food Reviews",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reviews/food/{{food_id}}?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reviews", "food", "{{food_id}}"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get reviews for a specific food item"
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Review",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"food_id\": 1,\n    \"order_id\": \"{{order_id}}\",\n    \"rating\": 5,\n    \"review\": \"Absolutely delicious! Authentic Cambodian taste.\",\n    \"images\": [\"review_image1.jpg\", \"review_image2.jpg\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reviews",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reviews"]
+						},
+						"description": "Submit a review for a food item"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Review",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 4,\n    \"review\": \"Updated review: Still great but a bit spicy for me\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reviews/{{review_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reviews", "{{review_id}}"]
+						},
+						"description": "Update an existing review"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Review",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reviews/{{review_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reviews", "{{review_id}}"]
+						},
+						"description": "Delete a review"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📊 Analytics & Reports",
+			"description": "User statistics and reports",
+			"item": [
+				{
+					"name": "Get Order Statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/analytics/orders?period=monthly",
+							"host": ["{{base_url}}"],
+							"path": ["api", "analytics", "orders"],
+							"query": [
+								{
+									"key": "period",
+									"value": "monthly",
+									"description": "daily, weekly, monthly, yearly"
+								}
+							]
+						},
+						"description": "Get user's order statistics"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Spending Summary",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/analytics/spending?start_date=2025-01-01&end_date=2025-12-31",
+							"host": ["{{base_url}}"],
+							"path": ["api", "analytics", "spending"],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2025-01-01"
+								},
+								{
+									"key": "end_date",
+									"value": "2025-12-31"
+								}
+							]
+						},
+						"description": "Get spending summary for a date range"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Favorite Categories",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/analytics/favorite-categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "analytics", "favorite-categories"]
+						},
+						"description": "Get user's most ordered categories"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🛠️ App Settings",
+			"description": "Application configuration and settings",
+			"item": [
+				{
+					"name": "Get App Config",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/config",
+							"host": ["{{base_url}}"],
+							"path": ["api", "config"]
+						},
+						"description": "Get app configuration (delivery fee, tax rate, etc.)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Restaurant Info",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/restaurant-info",
+							"host": ["{{base_url}}"],
+							"path": ["api", "restaurant-info"]
+						},
+						"description": "Get restaurant information (hours, contact, location)"
+					},
+					"response": []
+				},
+				{
+					"name": "Contact Support",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"subject\": \"Issue with my order\",\n    \"message\": \"I need help with order #12345\",\n    \"order_id\": \"{{order_id}}\",\n    \"contact_email\": \"loopy@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/support/contact",
+							"host": ["{{base_url}}"],
+							"path": ["api", "support", "contact"]
+						},
+						"description": "Send message to customer support"
+					},
+					"response": []
+				},
+				{
+					"name": "Report Issue",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"issue_type\": \"order_problem\",\n    \"description\": \"Food was cold when delivered\",\n    \"order_id\": \"{{order_id}}\",\n    \"images\": [\"issue_image.jpg\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/support/report",
+							"host": ["{{base_url}}"],
+							"path": ["api", "support", "report"]
+						},
+						"description": "Report an issue with order or app"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	],
 	"variable": [
 		{
 			"key": "base_url",
 			"value": "http://192.168.1.86:5000",
+			"type": "string"
+		},
+		{
+			"key": "auth_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "order_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "food_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "category_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "cart_item_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "payment_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "notification_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "review_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "address_id",
+			"value": "",
 			"type": "string"
 		}
 	]

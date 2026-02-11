@@ -1,6 +1,7 @@
 using AmorkApp.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AmorkApp.Models;
 
 namespace AmorkApp.Controllers;
 

@@ -1,31 +1,33 @@
 name: amork
-description: "A new Flutter project."
+description: Food Delivery Application
 publish_to: 'none'
-
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.8.1
+  sdk: '>=3.8.1 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-
-  cupertino_icons: ^1.0.8
-  # Added for API communication with your C# backend
+  # Merged Dependencies (Your project + Friend's project)
+  google_fonts: ^6.1.0
   http: ^1.1.0
-  # Added to display food images from your AWS/Local server
+  provider: ^6.1.1
+  shared_preferences: ^2.2.2
   cached_network_image: ^3.3.0
+  flutter_rating_bar: ^4.0.1
+  intl: ^0.19.0
+  uuid: ^4.3.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  flutter_lints: ^5.0.0
+  # Using 2.0.0 for better compatibility with your SDK version
+  flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
 
-  # If you have local icons or logo images, uncomment and use this section:
-  # assets:
-  #   - assets/images/
+  # Assets configuration
+  assets:
+    - assets/img/

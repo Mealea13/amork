@@ -3,17 +3,27 @@ class UserModel {
   final String name;
   final String email;
   final String phone;
-  final String membershipStatus; // e.g., "VIP"
+  final String membershipStatus;
   final String? profileImage;
 
   UserModel({
     required this.id,
     required this.name,
     required this.email,
-    required this.phone,
-    required this.membershipStatus,
+    this.phone = '',
+    this.membershipStatus = 'Member',
     this.profileImage,
   });
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'email': email,
+      'phone': phone,
+      'membershipStatus': membershipStatus,
+      'profileImage': profileImage,
+    };
+  }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
