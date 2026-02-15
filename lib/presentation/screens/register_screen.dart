@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'home_screen.dart';
+import 'package:amork/data/services/api_service.dart';
+import 'package:amork/data/models/user_model.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -13,6 +13,8 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePassword = true;
   bool _agreeToTerms = false;
+  bool _isLoading = false;
+
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -93,20 +95,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return true;
   }
 
-  void _handleRegister() {
-    _clearError();
-    
-    if (!_validateInputs()) return;
+  Future<void> _handleRegister() async {
+  _clearError();
+  if (!_validateInputs()) return;
 
-    // Mock registration success
-    _showSnackBar('Account created successfully!', isError: false);
-    
-    // Navigate to home screen
-    Navigator.pushReplacement(
-      context,
-      CupertinoPageRoute(builder: (context) => const HomeScreen()),
+  setState(() => _isLoading = true);
+
+  try {
+    final apiService = ApiService();
+    final newUser = UserModel(
+      id: '',
+      name: _nameController.text.trim(),
+      email: _emailController.text.trim(),
+      phone: '',
     );
+    await apiService.register(newUser, _passwordController.text);
+
+    if (mounted) {
+      _showSnackBar('Account created successfully!', isError: false);
+      Navigator.pop(context); // Take them back to Login screen
+    }
+  } catch (e) {
+    if (mounted) {
+      _setError(e.toString().replaceAll("Exception: ", ""));
+    }
+  } finally {
+    if (mounted) setState(() => _isLoading = false);
   }
+}
 
   void _handleGoogleRegister() {
     _showSnackBar('Google Sign-In coming soon!', isError: false);
@@ -128,7 +144,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Header
+                  // ... (Headers remain same)
                   Text(
                     'Getting Started',
                     style: GoogleFonts.poppins(
@@ -145,9 +161,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       color: const Color(0xFF888888),
                     ),
                   ),
-                  
                   const SizedBox(height: 30),
-                  
                   // Email Field
                   TextField(
                     controller: _emailController,
@@ -158,17 +172,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       hintStyle: GoogleFonts.poppins(color: const Color(0xFF888888)),
                       filled: true,
                       fillColor: const Color(0xFFF2F2F2),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
                     ),
                   ),
-                  
                   const SizedBox(height: 20),
-                  
-                  // Name Field
                   TextField(
                     controller: _nameController,
                     textCapitalization: TextCapitalization.words,
@@ -178,16 +186,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       hintStyle: GoogleFonts.poppins(color: const Color(0xFF888888)),
                       filled: true,
                       fillColor: const Color(0xFFF2F2F2),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
                     ),
                   ),
-                  
                   const SizedBox(height: 20),
-                  
                   // Password Field
                   TextField(
                     controller: _passwordController,
@@ -198,164 +201,86 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       hintStyle: GoogleFonts.poppins(color: const Color(0xFF888888)),
                       filled: true,
                       fillColor: const Color(0xFFF2F2F2),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
                       suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                          color: const Color(0xFF888888),
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
+                        icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: const Color(0xFF888888)),
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                       ),
                     ),
                   ),
-                  
                   const SizedBox(height: 20),
-                  
-                  // Visual Divider (Dashes)
+
+                  // Visual Divider
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      5,
-                      (index) => Container(
-                        width: 20,
-                        height: 2,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        color: Colors.grey[300],
-                      ),
-                    ),
+                    children: List.generate(5, (index) => Container(width: 20, height: 2, margin: const EdgeInsets.symmetric(horizontal: 4), color: Colors.grey[300])),
                   ),
-                  
                   const SizedBox(height: 20),
-                  
                   // Terms Checkbox
                   Row(
                     children: [
                       Checkbox(
                         value: _agreeToTerms,
                         onChanged: (value) {
-                          setState(() {
-                            _agreeToTerms = value ?? false;
-                          });
+                          setState(() => _agreeToTerms = value ?? false);
                           _clearError();
                         },
                         activeColor: Colors.teal,
                       ),
                       Expanded(
-                        child: Text(
-                          'By Creating an account, you agree to our Term and conditions',
-                          style: GoogleFonts.poppins(
-                            fontSize: 11,
-                            color: const Color(0xFF888888),
-                          ),
-                        ),
+                        child: Text('By Creating an account, you agree to our Term and conditions', style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF888888))),
                       ),
                     ],
                   ),
-                  
-                  // Error Message
+
+                  // Error Message Box
                   if (_errorMessage != null)
                     Container(
                       width: double.infinity,
                       margin: const EdgeInsets.only(top: 10),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFEBEE),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFFEF5350)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.error_outline,
-                            color: Color(0xFFD32F2F),
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _errorMessage!,
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                color: const Color(0xFFD32F2F),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      decoration: BoxDecoration(color: const Color(0xFFFFEBEE), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFEF5350))),
+                      child: Row(children: [const Icon(Icons.error_outline, color: Color(0xFFD32F2F), size: 20), const SizedBox(width: 8), Expanded(child: Text(_errorMessage!, style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFFD32F2F))))]),
                     ),
-                  
                   const SizedBox(height: 20),
-                  
-                  // Register Button
                   Container(
                     width: double.infinity,
                     height: 55,
                     decoration: BoxDecoration(
                       color: const Color(0xFFFFF3D6),
                       borderRadius: BorderRadius.circular(30),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
+                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4))],
                     ),
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        onTap: _handleRegister,
+                        // If loading, disable the tap
+                        onTap: _isLoading ? null : _handleRegister,
                         borderRadius: BorderRadius.circular(30),
                         child: Center(
-                          child: Text(
-                            'Register',
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF1A1A1A),
-                            ),
-                          ),
+                          child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(color: Color(0xFF1A1A1A), strokeWidth: 2)
+                              )
+                            : Text(
+                                'Register',
+                                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1A1A1A)),
+                              ),
                         ),
                       ),
                     ),
                   ),
-                  
                   const SizedBox(height: 15),
-                  
-                  // OR Text
-                  Text(
-                    'OR',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: const Color(0xFF888888),
-                    ),
-                  ),
-                  
+                  Text('OR', style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF888888))),
                   const SizedBox(height: 15),
-                  
                   // Google Button
                   Container(
                     width: double.infinity,
                     height: 55,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE0E0E0),
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
+                    decoration: BoxDecoration(color: const Color(0xFFE0E0E0), borderRadius: BorderRadius.circular(30), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4))]),
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
@@ -364,52 +289,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image.asset(
-                              'assets/images/google_icon.png',
-                              width: 24,
-                              height: 24,
-                              errorBuilder: (context, error, stackTrace) {
-                                return const Icon(Icons.g_mobiledata, size: 24);
-                              },
-                            ),
+                            Image.asset('assets/images/google_icon.png', width: 24, height: 24, errorBuilder: (context, error, stackTrace) => const Icon(Icons.g_mobiledata, size: 24)),
                             const SizedBox(width: 10),
-                            Text(
-                              'Continue to Google',
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF1A1A1A),
-                              ),
-                            ),
+                            Text('Continue to Google', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A1A))),
                           ],
                         ),
                       ),
                     ),
                   ),
-                  
                   const SizedBox(height: 20),
-                  
                   // Footer
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        'Already have an account? ',
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          color: const Color(0xFF888888),
-                        ),
-                      ),
+                      Text('Already have an account? ', style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF888888))),
                       GestureDetector(
                         onTap: _navigateToLogin,
-                        child: Text(
-                          'Sign in',
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            color: Colors.blue,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child: Text('Sign in', style: GoogleFonts.poppins(fontSize: 13, color: Colors.blue, fontWeight: FontWeight.w600)),
                       ),
                     ],
                   ),

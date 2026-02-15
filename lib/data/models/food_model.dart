@@ -1,15 +1,13 @@
 class FoodModel {
-  final String id;
+  final int id;
   final String name;
   final String description;
   final double price;
   final int calories;
   final String time;
   final String imageUrl;
-  final double rating;    // Added to match C# decimal
-  final int categoryId;   // Added to match C# int
-
-  String get foodId => id;
+  final double rating;
+  final int categoryId;
 
   FoodModel({
     required this.id,
@@ -19,35 +17,34 @@ class FoodModel {
     required this.calories,
     required this.time,
     required this.imageUrl,
-    this.rating = 0.0,    // Added
-    this.categoryId = 0,  // Added
+    this.rating = 0.0,
+    this.categoryId = 0,
   });
+  factory FoodModel.fromJson(Map<String, dynamic> json) {
+    return FoodModel(
+      id: int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      name: json['food_name'] ?? json['name'] ?? '',
+      description: json['description'] ?? '',
+      price: (json['price'] ?? 0).toDouble(),
+      calories: json['calories'] ?? 0,
+      time: json['cooking_time'] ?? json['time'] ?? '',
+      imageUrl: json['image_url'] ?? json['imageUrl'] ?? '',
+      rating: (json['rating'] ?? 0.0).toDouble(),
+      categoryId: json['category_id'] ?? json['categoryId'] ?? 0,
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
+      'food_name': name,
       'description': description,
       'price': price,
       'calories': calories,
-      'time': time,
-      'imageUrl': imageUrl,
-      'rating': rating,      // Added
-      'categoryId': categoryId, // Added
+      'cooking_time': time,
+      'image_url': imageUrl,
+      'rating': rating,
+      'category_id': categoryId,
     };
-  }
-
-  factory FoodModel.fromJson(Map<String, dynamic> json) {
-    return FoodModel(
-      id: (json['id'] ?? json['foodId'] ?? '').toString(),
-      name: json['name'] ?? '',
-      description: json['description'] ?? '',
-      price: (json['price'] ?? 0.0).toDouble(),
-      calories: json['calories'] ?? 0,
-      time: json['time'] ?? '',
-      imageUrl: json['imageUrl'] ?? '',
-      rating: (json['rating'] ?? 0.0).toDouble(), // Added
-      categoryId: json['categoryId'] ?? 0,
-    );
   }
 }

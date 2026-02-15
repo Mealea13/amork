@@ -27,7 +27,7 @@ public class CartController : ControllerBase
                 c.CartItemId,
                 c.FoodId,
                 c.Quantity,
-                Food = _context.Foods.FirstOrDefault(f => f.FoodId == c.FoodId)
+                Food = _context.foods.FirstOrDefault(f => f.FoodId == c.FoodId)
             })
             .ToListAsync();
 

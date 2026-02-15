@@ -182,7 +182,7 @@ public class ProfileController : ControllerBase
             user.Email,
             user.Phone,
             user.MemberType,
-            user.CreateAt
+            user.CreatedAt
         });
     }
 

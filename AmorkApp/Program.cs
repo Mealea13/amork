@@ -3,6 +3,18 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// --- 1. ADD CORS SERVICES HERE ---
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()    // Allows requests from any IP/Browser
+              .AllowAnyMethod()    // Allows GET, POST, PUT, DELETE
+              .AllowAnyHeader();   // Allows Authorization tokens and Content-Type
+    });
+});
+// ---------------------------------
+
 // Add services to the container.
 builder.Services.AddControllers();
 
@@ -12,6 +24,11 @@ builder.Services.AddDbContext<AmorkDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 var app = builder.Build();
+
+// --- 2. USE CORS MIDDLEWARE HERE ---
+// (Must be placed BEFORE app.MapControllers())
+app.UseCors("AllowAll");
+// -----------------------------------
 
 // app.UseHttpsRedirection();
 app.MapControllers();

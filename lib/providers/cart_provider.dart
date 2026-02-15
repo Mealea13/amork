@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import '../data/models/cart_model.dart';
+import '../data/models/cart_item_model.dart';
 import '../data/models/food_model.dart';
 import '../data/services/api_service.dart';
 
@@ -10,20 +10,26 @@ class CartProvider with ChangeNotifier {
 
   List<CartItemModel> get items => _items;
   bool get isLoading => _isLoading;
-  int get itemCount => _items.length;
+  double get total {
+    return _items.fold(0.0, (sum, item) {
+      return sum + (item.food.price * item.quantity);
+    });
+  }
 
-  double get total => _items.fold(0, (sum, item) => sum + (item.food.price * item.quantity));
-
-  Future<void> loadCart(String userId) async {
+  // Load Cart
+  Future<void> loadCart() async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      final response = await _apiService.getCart(userId);
-      if (response != null && response['cartItems'] != null) {
+      final response = await _apiService.getCart();
+      if (response['cartItems'] != null) {
+        // Map the JSON list to our Dart Model list
         _items = (response['cartItems'] as List)
             .map((item) => CartItemModel.fromJson(item))
             .toList();
+      } else {
+        _items = [];
       }
     } catch (e) {
       debugPrint('Error loading cart: $e');
@@ -33,48 +39,40 @@ class CartProvider with ChangeNotifier {
     }
   }
 
-  Future<void> addToCart(String userId, FoodModel food) async {
-    final cartItem = CartItemModel(
-      cartItemId: DateTime.now().millisecondsSinceEpoch.toString(),
-      food: food,
-      quantity: 1,
-    );
-
+  // Add to Cart
+  Future<void> addToCart(FoodModel food) async {
     try {
-      await _apiService.addToCart(cartItem);
-      await loadCart(userId);
+      await _apiService.addToCart(food.id, 1);
+      await loadCart();
     } catch (e) {
       debugPrint('Error adding to cart: $e');
       rethrow;
     }
   }
+
   Future<void> updateQuantity(String cartItemId, int quantity) async {
     try {
       await _apiService.updateCartQuantity(cartItemId, quantity);
-      final index = _items.indexWhere((item) => item.cartItemId == cartItemId);
-      if (index != -1) {
-        _items[index].quantity = quantity;
-        notifyListeners();
-      }
+      await loadCart();
     } catch (e) {
       debugPrint('Error updating quantity: $e');
       rethrow;
     }
   }
 
-  Future<void> removeItem(String userId, String cartItemId) async {
+  Future<void> removeItem(String cartItemId) async {
     try {
       await _apiService.removeFromCart(cartItemId);
-      await loadCart(userId);
+      await loadCart();
     } catch (e) {
       debugPrint('Error removing item: $e');
       rethrow;
     }
   }
 
-  Future<void> clearCart(String userId) async {
+  Future<void> clearCart() async {
     try {
-      await _apiService.clearCart(userId);
+      await _apiService.clearCart();
       _items = [];
       notifyListeners();
     } catch (e) {

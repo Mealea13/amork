@@ -12,7 +12,7 @@ public class AmorkDbContext : DbContext
     public DbSet<Favorite> Favorite { get; set; }
     public DbSet<Review> Reviews { get; set; }
     public DbSet<Promotion> Promotions { get; set; }
-    public DbSet<Categories> Categories {get; set;}
     public DbSet<Cart> CartItem {get; set;}
     public DbSet<Order> orders{get; set;}
+    public DbSet<Category> Categories { get; set; }
 }

@@ -1,31 +1,48 @@
 import 'dart:convert';
+import 'package:amork/data/models/category_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_config.dart';
 import '../models/food_model.dart';
-import '../models/cart_model.dart';
-import '../models/order_model.dart';
+import '../models/cart_item_model.dart'; // Ensure you have this or CartModel
 import '../models/user_model.dart';
-import 'package:amork/data/models/order_request_model.dart';
 
 class ApiService {
-  // Authentication
-  Future<Map<String, dynamic>> register(UserModel user) async {
+  // Helper to get Headers with Token
+  Future<Map<String, String>> _getHeaders() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
+
+  // --- Authentication ---
+
+  Future<Map<String, dynamic>> register(UserModel user, String password) async {
     final response = await http.post(
-      Uri.parse('${AppConfig.authEndpoint}/register'),
+      Uri.parse('${AppConfig.baseUrl}/api/auth/register'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode(user.toJson()),
+      body: json.encode({
+        'fullname': user.name,
+        'email': user.email,
+        'password': password,
+        'phone': user.phone,
+        'member_type': 'regular',
+      }),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return json.decode(response.body);
     } else {
-      throw Exception('Registration failed');
+      throw Exception('Registration failed: ${response.body}');
     }
   }
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(
-      Uri.parse('${AppConfig.authEndpoint}/login'),
+      Uri.parse('${AppConfig.baseUrl}/api/auth/login'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'email': email, 'password': password}),
     );
@@ -37,37 +54,61 @@ class ApiService {
     }
   }
 
-  // Foods
+  Future<UserModel> getUserProfile(String userId) async {
+    final headers = await _getHeaders();
+    final response = await http.get(
+      Uri.parse('${AppConfig.baseUrl}/api/profile'),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return UserModel.fromJson(data);
+    } else {
+      throw Exception('Failed to load profile');
+    }
+  }
+  Future<List<CategoryModel>> getCategories() async {
+    final headers = await _getHeaders();
+    final response = await http.get(
+      Uri.parse('${AppConfig.baseUrl}/api/categories'),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => CategoryModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load categories');
+    }
+  }
+
+
+  // --- Foods ---
+
   Future<List<FoodModel>> getPopularFoods() async {
+    final headers = await _getHeaders();
     final response = await http.get(
-      Uri.parse('${AppConfig.foodsEndpoint}/popular'),
+      Uri.parse('${AppConfig.baseUrl}/api/foods/popular?limit=10'),
+      headers: headers,
     );
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       return data.map((item) => FoodModel.fromJson(item)).toList();
     } else {
-      throw Exception('Failed to load foods');
+      throw Exception('Failed to load popular foods');
     }
   }
 
-  Future<List<FoodModel>> getFoodsByCategory(int categoryId) async {
-    final response = await http.get(
-      Uri.parse('${AppConfig.categoriesEndpoint}/$categoryId/foods'),
-    );
+  // --- Cart Operations (Updated to match your API) ---
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      return data.map((item) => FoodModel.fromJson(item)).toList();
-    } else {
-      throw Exception('Failed to load foods');
-    }
-  }
-
-  // Cart Operations
-  Future<Map<String, dynamic>> getCart(String userId) async {
+  // Note: API uses Token to identify user, so we don't need userId in params
+  Future<Map<String, dynamic>> getCart() async {
+    final headers = await _getHeaders();
     final response = await http.get(
-      Uri.parse('${AppConfig.cartEndpoint}/$userId'),
+      Uri.parse('${AppConfig.baseUrl}/api/cart'),
+      headers: headers,
     );
 
     if (response.statusCode == 200) {
@@ -77,22 +118,29 @@ class ApiService {
     }
   }
 
-  Future<void> addToCart(CartItemModel item) async {
+  Future<void> addToCart(int foodId, int quantity) async {
+    final headers = await _getHeaders();
     final response = await http.post(
-      Uri.parse('${AppConfig.cartEndpoint}/add'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(item.toJson()),
+      Uri.parse('${AppConfig.baseUrl}/api/cart/add'),
+      headers: headers,
+      // API expects food_id and quantity, NOT a full object
+      body: json.encode({
+        'food_id': foodId,
+        'quantity': quantity,
+        // Add 'additional_ingredients' here if needed later
+      }),
     );
 
-    if (response.statusCode != 200) {
+    if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Failed to add to cart');
     }
   }
 
   Future<void> updateCartQuantity(String cartItemId, int quantity) async {
+    final headers = await _getHeaders();
     final response = await http.put(
-      Uri.parse('${AppConfig.cartEndpoint}/update/$cartItemId'),
-      headers: {'Content-Type': 'application/json'},
+      Uri.parse('${AppConfig.baseUrl}/api/cart/$cartItemId'),
+      headers: headers,
       body: json.encode({'quantity': quantity}),
     );
 
@@ -102,8 +150,10 @@ class ApiService {
   }
 
   Future<void> removeFromCart(String cartItemId) async {
+    final headers = await _getHeaders();
     final response = await http.delete(
-      Uri.parse('${AppConfig.cartEndpoint}/remove/$cartItemId'),
+      Uri.parse('${AppConfig.baseUrl}/api/cart/$cartItemId'),
+      headers: headers,
     );
 
     if (response.statusCode != 200) {
@@ -111,77 +161,15 @@ class ApiService {
     }
   }
 
-  Future<void> clearCart(String userId) async {
+  Future<void> clearCart() async {
+    final headers = await _getHeaders();
     final response = await http.delete(
-      Uri.parse('${AppConfig.cartEndpoint}/clear/$userId'),
+      Uri.parse('${AppConfig.baseUrl}/api/cart/clear'),
+      headers: headers,
     );
 
     if (response.statusCode != 200) {
       throw Exception('Failed to clear cart');
-    }
-  }
-
-  Future<Map<String, dynamic>> placeOrder(OrderRequestModel order) async {
-    final response = await http.post(
-      Uri.parse('${AppConfig.ordersEndpoint}/place'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(order.toJson()),
-    );
-
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to place order');
-    }
-  }
-
-  Future<List<OrderModel>> getUserOrders(String userId) async {
-    final response = await http.get(
-      Uri.parse('${AppConfig.ordersEndpoint}/user/$userId'),
-    );
-
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      return data.map((item) => OrderModel.fromJson(item)).toList();
-    } else {
-      throw Exception('Failed to load orders');
-    }
-  }
-
-  Future<Map<String, dynamic>> getOrderDetails(int orderId) async {
-    final response = await http.get(
-      Uri.parse('${AppConfig.ordersEndpoint}/$orderId'),
-    );
-
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load order details');
-    }
-  }
-
-  // Profile
-  Future<UserModel> getUserProfile(String userId) async {
-    final response = await http.get(
-      Uri.parse('${AppConfig.profileEndpoint}/$userId'),
-    );
-
-    if (response.statusCode == 200) {
-      return UserModel.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to load profile');
-    }
-  }
-
-  Future<void> updateProfile(String userId, Map<String, dynamic> data) async {
-    final response = await http.put(
-      Uri.parse('${AppConfig.profileEndpoint}/update/$userId'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(data),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to update profile');
     }
   }
 }
