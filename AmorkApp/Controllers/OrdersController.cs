@@ -69,14 +69,14 @@ public class OrdersController : ControllerBase
 
         foreach (var cartItem in cartItems)
         {
-            var food = await _context.Foods.FindAsync(cartItem.FoodId);
+            var food = await _context.foods.FindAsync(cartItem.FoodId);
             if (food != null)
             {
                 totalAmount += food.Price * cartItem.Quantity;
                 orderItems.Add(new Order
                 {
                     FoodId = food.FoodId,
-                    FoodName = food.FoodName,
+                    FoodName = food.Name,
                     Quantity = cartItem.Quantity,
                     Price = food.Price
                 });

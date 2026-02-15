@@ -15,14 +15,14 @@ public class AuthController : ControllerBase
     {
         _context = context;
     }
-
-    // 1. Register Endpoint
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] User user)
     {
-        // Check if user already exists
         var exists = await _context.Users.AnyAsync(u => u.Email == user.Email);
         if (exists) return BadRequest(new { message = "Email already registered" });
+        if (user.CreatedAt == null) {
+            user.CreatedAt = DateTime.UtcNow;
+        }
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
@@ -37,15 +37,19 @@ public class AuthController : ControllerBase
             .FirstOrDefaultAsync(u => u.Email == loginData.Email && u.PasswordText == loginData.Password);
 
         if (user == null) return Unauthorized(new { message = "Invalid email or password" });
-
-        return Ok(new { 
-            message = "Login successful", 
-            user = new { user.Fullname, user.Email } 
+        return Ok(new {
+            message = "Login successful",
+            token = "mock_token_for_development",
+            user = new {
+                id = user.UserId,
+                fullname = user.Fullname,
+                email = user.Email,
+                memberType = user.MemberType
+            }
         });
     }
 }
 
-// Data Transfer Object for Login
 public class LoginRequest
 {
     public string Email { get; set; } = string.Empty;

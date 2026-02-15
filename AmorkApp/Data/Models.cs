@@ -1,8 +1,6 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-
 namespace AmorkApp.Models;
 
 [Table("users")]
@@ -10,7 +8,7 @@ public class User
 {
     [Key]
     [Column("user_id")]
-    public Guid UserId { get; set; }
+    public Guid UserId { get; set; } = Guid.NewGuid();
 
     [Column("fullname")]
     [JsonPropertyName("fullname")]
@@ -20,8 +18,9 @@ public class User
     [JsonPropertyName("email")]
     public string Email { get; set; } = string.Empty;
 
+    // ✅ THE FIX: This maps the JSON key "password" to your DB column "password_text"
     [Column("password_text")]
-    [JsonPropertyName("passwordText")]
+    [JsonPropertyName("password")] 
     public string PasswordText { get; set; } = string.Empty;
 
     [Column("phone")]
@@ -29,9 +28,15 @@ public class User
     public string? Phone { get; set; }
 
     [Column("member_type")]
-    [JsonPropertyName("memberType")]
-    public string? MemberType { get; set; }
+    [JsonPropertyName("member_type")]
+    public string? MemberType { get; set; } = "regular";
 
-    [Column("create_at")] // Matches DB naming convention
-    public DateTime? CreateAt { get; set; }
+    [Column("created_at")]
+    public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
+
+    [Column("updated_at")]
+    public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    [Column("is_active")]
+    public bool IsActive { get; set; } = true;
 }

@@ -1,3 +1,5 @@
+//AmorkApp/Controllers/CategoriesController.cs
+
 using AmorkApp.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -33,19 +35,18 @@ public class CategoriesController : ControllerBase
         return Ok(category);
     }
 
-    // GET: api/categories/{id}/foods
     [HttpGet("{id}/foods")]
     public async Task<IActionResult> GetFoodsByCategory(int id)
     {
-        var foods = await _context.Foods
-            .Where(f => f.FoodId == id)
+        var foods = await _context.foods
+            .Where(f => f.CategoryId == id)
             .ToListAsync();
         return Ok(foods);
     }
 
     // POST: api/categories
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] Categories category)
+    public async Task<IActionResult> Create([FromBody] Category category) // Changed to Category
     {
         _context.Categories.Add(category);
         await _context.SaveChangesAsync();
@@ -54,14 +55,15 @@ public class CategoriesController : ControllerBase
 
     // PUT: api/categories/{id}
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] Categories categoryData)
+    public async Task<IActionResult> Update(int id, [FromBody] Category categoryData) // Changed to Category
     {
         var category = await _context.Categories.FindAsync(id);
         if (category == null) return NotFound();
 
+        // Updated to match the properties in our new Category model
         category.Name = categoryData.Name;
-        category.Description = categoryData.Description;
-        category.ImageUrl = categoryData.ImageUrl;
+        category.Icon = categoryData.Icon;
+        category.Color = categoryData.Color;
 
         await _context.SaveChangesAsync();
         return Ok(new { message = "Category updated successfully" });

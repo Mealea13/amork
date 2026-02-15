@@ -37,7 +37,6 @@ class WelcomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            
             // Middle Section - Text
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),

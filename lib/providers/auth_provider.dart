@@ -15,7 +15,6 @@ class AuthProvider with ChangeNotifier {
 
   final ApiService _apiService = ApiService();
 
-  // Check if user is logged in on app start
   Future<void> checkLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userId');
@@ -24,7 +23,6 @@ class AuthProvider with ChangeNotifier {
         _currentUser = await _apiService.getUserProfile(userId);
         notifyListeners();
       } catch (e) {
-        // If failed to load profile, clear saved data
         await logout();
       }
     }
@@ -37,8 +35,10 @@ class AuthProvider with ChangeNotifier {
 
     try {
       final response = await _apiService.login(email, password);
-      // Save user data
       final prefs = await SharedPreferences.getInstance();
+      if (response['token'] != null) {
+        await prefs.setString('auth_token', response['token']);
+      }
       await prefs.setString('userId', response['user']['userId']);
       _currentUser = UserModel(
         id: response['user']['userId'],
@@ -56,13 +56,13 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> register(UserModel user) async {
+  Future<bool> register(UserModel user, String password) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      await _apiService.register(user);
+      await _apiService.register(user, password);
       _isLoading = false;
       notifyListeners();
       return true;
