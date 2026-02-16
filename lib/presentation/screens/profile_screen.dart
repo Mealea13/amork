@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'edit_profile_screen.dart'; // Make sure this matches your file name!
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart'; // NEW IMPORT!
+import 'package:amork/presentation/screens/edit_profile_screen.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -16,24 +19,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String email = "Loopy@gmail.com";
   File? profileImage;
 
+  // --- NEW: FUNCTION TO PICK AN IMAGE FROM GALLERY ---
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    // Opens the phone's photo gallery
+    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        profileImage = File(pickedFile.path); // Updates the picture!
+      });
+    }
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token');
+    await prefs.remove('user_id');
+
+    await Future.delayed(const Duration(seconds: 1)); 
+
+    if (context.mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEDEDED),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFE7DCC3),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
+      // Strictly enforcing the background color here as well
+      backgroundColor: const Color(0xFFF9F6F0), 
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           child: Column(
             children: [
               Stack(
                 clipBehavior: Clip.none,
                 children: [
                   Container(
-                    height: 180,
+                    height: 200,
                     decoration: const BoxDecoration(
                       color: Color(0xFFE7DCC3),
                       borderRadius: BorderRadius.only(
@@ -43,7 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   const Positioned(
-                    top: 0,
+                    top: 20,
                     left: 0,
                     right: 0,
                     child: Center(
@@ -57,7 +92,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   Positioned(
-                    top: 0,
+                    top: 15,
                     right: 20,
                     child: IconButton(
                       icon: const Icon(Icons.edit),
@@ -87,21 +122,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       },
                     ),
                   ),
+                  
+                  // --- NEW: CLICKABLE PROFILE PICTURE ---
                   Positioned(
                     bottom: -60,
                     left: 0,
                     right: 0,
-                    child: CircleAvatar(
-                      radius: 65,
-                      backgroundColor: Colors.white,
-                      child: CircleAvatar(
-                        radius: 60,
-                        backgroundImage: profileImage != null
-                            ? FileImage(profileImage!)
-                            : null,
-                        child: profileImage == null
-                            ? const Icon(Icons.person, size: 60)
-                            : null,
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: _pickImage, // Triggers the gallery!
+                        child: Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 65,
+                              backgroundColor: Colors.white,
+                              child: CircleAvatar(
+                                radius: 60,
+                                backgroundImage: profileImage != null
+                                    ? FileImage(profileImage!)
+                                    : null,
+                                backgroundColor: const Color(0xFFF1E6D3),
+                                child: profileImage == null
+                                    ? const Icon(Icons.person, size: 60, color: Colors.grey)
+                                    : null,
+                              ),
+                            ),
+                            // Cute camera icon badge
+                            Positioned(
+                              bottom: 0,
+                              right: 5,
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 2),
+                                ),
+                                child: const Icon(Icons.camera_alt, color: Colors.white, size: 18),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -112,7 +173,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
               profileItem(Icons.business, "Member", member),
               profileItem(Icons.phone, "Phone no.", phone),
               profileItem(Icons.email, "E-Mail", email),
-              const SizedBox(height: 100),
+              
+              const SizedBox(height: 30),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFEBEE), 
+                    foregroundColor: Colors.red, 
+                    elevation: 0,
+                    minimumSize: const Size(double.infinity, 55),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: const BorderSide(color: Colors.red, width: 1.5), 
+                    ),
+                  ),
+                  onPressed: () => _handleLogout(context),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.logout),
+                      SizedBox(width: 10),
+                      Text("Log Out", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 50),
             ],
           ),
         ),
@@ -122,25 +211,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget profileItem(IconData icon, String title, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 18),
-      child: Row(
-        children: [
-          Icon(icon),
-          const SizedBox(width: 20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(value, style: const TextStyle(fontSize: 18)),
-            ],
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+      child: Container(
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 5)),
+          ]
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(color: const Color(0xFFF1E6D3), borderRadius: BorderRadius.circular(15)),
+              child: Icon(icon, color: Colors.orange),
+            ),
+            const SizedBox(width: 20),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                const SizedBox(height: 4),
+                Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

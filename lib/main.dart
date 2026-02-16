@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-// 1. IMPORT YOUR PROVIDERS
 import 'providers/auth_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/home_provider.dart';
-
-// 2. IMPORT YOUR SCREENS
 import 'presentation/screens/welcome_screen.dart';
 
 void main() {
@@ -30,7 +26,11 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Amork Food App',
+      themeMode: ThemeMode.light,
       theme: ThemeData(
+        brightness: Brightness.light,
+        // This makes sure every new screen starts with your Figma beige color
+        scaffoldBackgroundColor: const Color(0xFFF9F6F0),
         primarySwatch: Colors.orange,
         useMaterial3: true,
       ),

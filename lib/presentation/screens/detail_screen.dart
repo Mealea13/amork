@@ -16,7 +16,7 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8E7), // Matches the Figma top background
+      backgroundColor: const Color(0xFFFFF8E7), 
       body: Column(
         children: [
           // ================= TOP SECTION =================
@@ -27,8 +27,8 @@ class _DetailScreenState extends State<DetailScreen> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: const Icon(Icons.arrow_back, color: Colors.black, size: 28),
+                  onTap: () => Navigator.pop(context), 
+                  child: const Icon(Icons.arrow_back, color: Colors.black, size: 28)
                 ),
               ),
             ),
@@ -37,157 +37,113 @@ class _DetailScreenState extends State<DetailScreen> {
           // Big Food Image
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Image.asset(widget.food.imageUrl, height: 250, fit: BoxFit.contain),
+            child: Image.asset(widget.food.imageUrl, height: 250, fit: BoxFit.contain, errorBuilder: (c,e,s) => const Icon(Icons.fastfood, size: 100, color: Colors.grey)),
           ),
 
           // ================= BOTTOM SECTION =================
           Expanded(
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(40),
-                  topRight: Radius.circular(40),
-                ),
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(40), topRight: Radius.circular(40)),
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  
-                  // --- Rating & Price Row ---
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFF3D6),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          children: const [
-                            Icon(Icons.star, color: Colors.orange, size: 18),
-                            SizedBox(width: 5),
-                            Text(
-                              "4.8",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        "\$${(widget.food.price * quantity).toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // --- Title & Quantity Selector ---
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          widget.food.name,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Row(
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          GestureDetector(
-                            onTap: () {
-                              if (quantity > 1) {
-                                setState(() => quantity--);
-                              }
-                            },
-                            child: const Icon(Icons.remove_circle, color: Colors.orange, size: 28),
+                          // --- Rating & Price Row ---
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(color: const Color(0xFFFFF3D6), borderRadius: BorderRadius.circular(20)),
+                                child: Row(children: const [Icon(Icons.star, color: Colors.orange, size: 18), SizedBox(width: 5), Text("4.8", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))]),
+                              ),
+                              
+                              // DISCOUNT PRICE LOGIC
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  if (widget.food.originalPrice != null)
+                                    Text("\$${(widget.food.originalPrice! * quantity).toStringAsFixed(2)}", style: const TextStyle(decoration: TextDecoration.lineThrough, color: Colors.grey, fontSize: 14)),
+                                  Text(
+                                    "\$${(widget.food.price * quantity).toStringAsFixed(2)}",
+                                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: widget.food.originalPrice != null ? Colors.red : Colors.orange),
+                                  ),
+                                ],
+                              )
+                            ],
                           ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Text(
-                              '$quantity',
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          const SizedBox(height: 20),
+
+                          // --- Title & Quantity Selector ---
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(child: Text(widget.food.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold))),
+                              Row(
+                                children: [
+                                  GestureDetector(onTap: () { if (quantity > 1) setState(() => quantity--); }, child: const Icon(Icons.remove_circle, color: Colors.orange, size: 28)),
+                                  Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text('$quantity', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+                                  GestureDetector(onTap: () => setState(() => quantity++), child: const Icon(Icons.add_circle, color: Colors.orange, size: 28)),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+
+                          // --- Description ---
+                          Text(widget.food.description, style: const TextStyle(color: Colors.grey, fontSize: 14, height: 1.5)),
+                          const SizedBox(height: 20),
+
+                          // --- Add-ons Section (ONLY FOR CATEGORY 1: FOOD) ---
+                          if (widget.food.categoryId == 1) ...[
+                            const Text("Add ons", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                _addOnItem("assets/images/cheese.png"),
+                                _addOnItem("assets/images/amork.png"),
+                                _addOnItem("assets/images/cheese.png"),
+                              ],
                             ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() => quantity++);
-                            },
-                            child: const Icon(Icons.add_circle, color: Colors.orange, size: 28),
-                          ),
+                            const SizedBox(height: 20), 
+                          ],
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 15),
-
-                  // --- Description ---
-                  // Using the exact text from your Figma design
-                  const Text(
-                    "Fish Amok is one of the most iconic traditional dishes of Cambodia, often regarded as the nation's signature food and a symbol of Khmer culinary heritage.",
-                    style: TextStyle(color: Colors.grey, fontSize: 14, height: 1.5),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // --- Add-ons Section ---
-                  const Text(
-                    "Add ons",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      // Using your local images so it doesn't crash!
-                      _addOnItem("assets/images/cheese.png"),
-                      _addOnItem("assets/images/amork.png"),
-                      _addOnItem("assets/images/cheese.png"),
-                    ],
-                  ),
-                  
-                  const Spacer(),
 
                   // --- Add to Cart Button ---
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFF3D6), // Figma beige color
-                      minimumSize: const Size(double.infinity, 55),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                      backgroundColor: const Color(0xFFFFF3D6), 
+                      minimumSize: const Size(double.infinity, 55), 
+                      elevation: 0, 
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))
                     ),
                     onPressed: () {
-                      // Modifies the item price based on the quantity before sending to cart
                       final cartItem = FoodModel(
-                        id: widget.food.id,
-                        name: widget.food.name,
+                        id: widget.food.id, 
+                        name: widget.food.name, 
                         categoryId: widget.food.categoryId,
                         price: widget.food.price * quantity, 
-                        imageUrl: widget.food.imageUrl,
-                        description: widget.food.description,
-                        calories: widget.food.calories,
+                        originalPrice: widget.food.originalPrice != null ? widget.food.originalPrice! * quantity : null,
+                        imageUrl: widget.food.imageUrl, 
+                        description: widget.food.description, 
+                        calories: widget.food.calories, 
                         time: widget.food.time,
                       );
                       Navigator.pop(context, cartItem);
                     },
-                    child: const Text(
-                      "Add to Cart",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: const Text("Add to Cart", style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -201,29 +157,18 @@ class _DetailScreenState extends State<DetailScreen> {
   // Helper widget to build the little Add-on boxes with the green "+"
   Widget _addOnItem(String imagePath) {
     return Container(
-      width: 65,
-      height: 65,
-      margin: const EdgeInsets.only(right: 15),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF9F6F0),
-        borderRadius: BorderRadius.circular(15),
-      ),
+      width: 65, height: 65, margin: const EdgeInsets.only(right: 15),
+      decoration: BoxDecoration(color: const Color(0xFFF9F6F0), borderRadius: BorderRadius.circular(15)),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          Center(
-            child: Image.asset(imagePath, height: 40, fit: BoxFit.contain),
-          ),
+          Center(child: Image.asset(imagePath, height: 40, fit: BoxFit.contain, errorBuilder: (c,e,s) => const Icon(Icons.fastfood, color: Colors.grey))),
           Positioned(
-            bottom: -5,
-            right: -5,
+            bottom: -5, right: -5, 
             child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.add_circle, color: Colors.green, size: 24),
-            ),
+              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), 
+              child: const Icon(Icons.add_circle, color: Colors.green, size: 24)
+            )
           ),
         ],
       ),

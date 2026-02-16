@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'main_screen.dart';
 
 class PaymentSuccessScreen extends StatelessWidget {
   const PaymentSuccessScreen({super.key});
@@ -15,36 +14,22 @@ class PaymentSuccessScreen extends StatelessWidget {
             Container(
               height: 180,
               width: 180,
-              decoration: const BoxDecoration(
-                color: Color(0xFFE9DCCB),
-                shape: BoxShape.circle,
-              ),
+              decoration: const BoxDecoration(color: Color(0xFFE9DCCB), shape: BoxShape.circle),
               child: const Icon(Icons.check, size: 120, color: Colors.green),
             ),
             const SizedBox(height: 30),
-            const Text(
-              "Your Order is Successful!",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+            const Text("Your Order is Successful!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
             const Text("Thank You so much for Order."),
             const SizedBox(height: 40),
             GestureDetector(
               onTap: () {
-                // Navigate back to Main Screen and clear history stack
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (_) => const MainScreen()),
-                  (route) => false,
-                );
+                // NEW: Popping 'true' tells the entire app the checkout is done!
+                Navigator.pop(context, true);
               },
               child: const Text(
                 "Back to Menu",
-                style: TextStyle(
-                  decoration: TextDecoration.underline,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: TextStyle(decoration: TextDecoration.underline, fontSize: 16, fontWeight: FontWeight.w500),
               ),
             ),
           ],
