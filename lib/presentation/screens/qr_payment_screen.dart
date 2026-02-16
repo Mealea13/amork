@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:amork/presentation/screens/payment_success_screen.dart';
+import 'payment_success_screen.dart'; // Make sure file name is correct!
 
 class QRPaymentScreen extends StatelessWidget {
   final double total;
@@ -21,63 +21,36 @@ class QRPaymentScreen extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 20),
-
-            /// QR Container
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE9DCCB),
-                borderRadius: BorderRadius.circular(30),
-              ),
+              decoration: BoxDecoration(color: const Color(0xFFE9DCCB), borderRadius: BorderRadius.circular(30)),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: Image.asset(
-                  "assets/images/aba_qr.png",
-                  height: 280,
-                  width: 280,
-                  fit: BoxFit.contain,
-                ),
+                child: Image.asset("assets/images/aba_qr.png", height: 280, width: 280, fit: BoxFit.contain, errorBuilder: (c,e,s) => const Icon(Icons.qr_code, size: 200)),
               ),
             ),
-
             const SizedBox(height: 30),
-
-            Text(
-              "Total: \$${total.toStringAsFixed(2)}",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-
+            Text("Total: \$${total.toStringAsFixed(2)}", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const Spacer(),
-
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE9DCCB),
-                minimumSize: const Size(double.infinity, 55),
-              ),
-              onPressed: () {
-                Navigator.pushReplacement(
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE9DCCB), minimumSize: const Size(double.infinity, 55)),
+              onPressed: () async {
+                final success = await Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const PaymentSuccessScreen(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const PaymentSuccessScreen()),
                 );
+                
+                // NEW: Pass success backwards!
+                if (success == true) {
+                  Navigator.pop(context, true); 
+                }
               },
-              child: const Text(
-                "I Have Paid",
-                style: TextStyle(color: Colors.black, fontSize: 16),
-              ),
+              child: const Text("I Have Paid", style: TextStyle(color: Colors.black, fontSize: 16)),
             ),
-
             const SizedBox(height: 15),
-
             GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: const Text(
-                "Back to Payment",
-                style: TextStyle(decoration: TextDecoration.underline),
-              ),
+              onTap: () => Navigator.pop(context),
+              child: const Text("Back to Payment", style: TextStyle(decoration: TextDecoration.underline)),
             ),
           ],
         ),
