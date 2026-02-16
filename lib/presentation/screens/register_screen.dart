@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:amork/data/services/api_service.dart';
 import 'package:amork/data/models/user_model.dart';
 
@@ -18,7 +20,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  String? _errorMessage;
 
   @override
   void dispose() {
@@ -28,104 +29,87 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  void _showSnackBar(String message, {bool isError = true}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _setError(String message) {
-    setState(() {
-      _errorMessage = message;
-    });
-  }
-
-  void _clearError() {
-    if (_errorMessage != null) {
-      setState(() {
-        _errorMessage = null;
-      });
-    }
-  }
-
   bool _validateInputs() {
     final email = _emailController.text.trim();
     final name = _nameController.text.trim();
     final password = _passwordController.text;
 
     if (email.isEmpty) {
-      _setError('Please enter your email');
+      QuickAlert.show(context: context, type: QuickAlertType.warning, title: 'Missing Input', text: 'Please enter your email');
       return false;
     }
-
     if (!email.contains('@') || !email.contains('.')) {
-      _setError('Please enter a valid email address');
+      QuickAlert.show(context: context, type: QuickAlertType.error, title: 'Invalid Email', text: 'Please enter a valid email address');
       return false;
     }
-
     if (name.isEmpty) {
-      _setError('Please enter your name');
+      QuickAlert.show(context: context, type: QuickAlertType.warning, title: 'Missing Input', text: 'Please enter your name');
       return false;
     }
-
     if (name.length < 2) {
-      _setError('Name must be at least 2 characters');
+      QuickAlert.show(context: context, type: QuickAlertType.error, title: 'Invalid Name', text: 'Name must be at least 2 characters');
       return false;
     }
-
     if (password.isEmpty) {
-      _setError('Please create a password');
+      QuickAlert.show(context: context, type: QuickAlertType.warning, title: 'Missing Input', text: 'Please create a password');
       return false;
     }
-
     if (password.length < 6) {
-      _setError('Password must be at least 6 characters');
+      QuickAlert.show(context: context, type: QuickAlertType.error, title: 'Weak Password', text: 'Password must be at least 6 characters');
       return false;
     }
-
     if (!_agreeToTerms) {
-      _setError('Please agree to the Terms and Conditions');
+      QuickAlert.show(context: context, type: QuickAlertType.info, title: 'Terms & Conditions', text: 'Please agree to the Terms and Conditions');
       return false;
     }
-
     return true;
   }
 
   Future<void> _handleRegister() async {
-  _clearError();
-  if (!_validateInputs()) return;
+    FocusScope.of(context).unfocus();
+    if (!_validateInputs()) return;
 
-  setState(() => _isLoading = true);
+    setState(() => _isLoading = true);
 
-  try {
-    final apiService = ApiService();
-    final newUser = UserModel(
-      id: '',
-      name: _nameController.text.trim(),
-      email: _emailController.text.trim(),
-      phone: '',
-    );
-    await apiService.register(newUser, _passwordController.text);
+    try {
+      final apiService = ApiService();
+      final newUser = UserModel(
+        id: '',
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: '',
+      );
+      await apiService.register(newUser, _passwordController.text);
 
-    if (mounted) {
-      _showSnackBar('Account created successfully!', isError: false);
-      Navigator.pop(context); // Take them back to Login screen
+      if (mounted) {
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.success,
+          title: 'Success',
+          text: 'Account created successfully!',
+          autoCloseDuration: const Duration(seconds: 2),
+          showConfirmBtn: false,
+        );
+        
+        await Future.delayed(const Duration(seconds: 2));
+        if (mounted) Navigator.pop(context); // Take them back to Login screen
+      }
+    } catch (e) {
+      if (mounted) {
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Registration Failed',
+          text: e.toString().replaceAll("Exception: ", ""),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
-  } catch (e) {
-    if (mounted) {
-      _setError(e.toString().replaceAll("Exception: ", ""));
-    }
-  } finally {
-    if (mounted) setState(() => _isLoading = false);
   }
-}
 
   void _handleGoogleRegister() {
-    _showSnackBar('Google Sign-In coming soon!', isError: false);
+    QuickAlert.show(context: context, type: QuickAlertType.info, title: 'Coming Soon', text: 'Google Sign-In is not available yet!');
   }
 
   void _navigateToLogin() {
@@ -144,7 +128,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // ... (Headers remain same)
                   Text(
                     'Getting Started',
                     style: GoogleFonts.poppins(
@@ -162,11 +145,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  // Email Field
                   TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    onChanged: (_) => _clearError(),
                     decoration: InputDecoration(
                       hintText: 'Your Email',
                       hintStyle: GoogleFonts.poppins(color: const Color(0xFF888888)),
@@ -180,7 +161,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextField(
                     controller: _nameController,
                     textCapitalization: TextCapitalization.words,
-                    onChanged: (_) => _clearError(),
                     decoration: InputDecoration(
                       hintText: 'Your Name',
                       hintStyle: GoogleFonts.poppins(color: const Color(0xFF888888)),
@@ -191,11 +171,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Password Field
                   TextField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
-                    onChanged: (_) => _clearError(),
                     decoration: InputDecoration(
                       hintText: 'Create Password',
                       hintStyle: GoogleFonts.poppins(color: const Color(0xFF888888)),
@@ -210,21 +188,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Visual Divider
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(5, (index) => Container(width: 20, height: 2, margin: const EdgeInsets.symmetric(horizontal: 4), color: Colors.grey[300])),
                   ),
                   const SizedBox(height: 20),
-                  // Terms Checkbox
                   Row(
                     children: [
                       Checkbox(
                         value: _agreeToTerms,
                         onChanged: (value) {
                           setState(() => _agreeToTerms = value ?? false);
-                          _clearError();
                         },
                         activeColor: Colors.teal,
                       ),
@@ -233,17 +207,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ],
                   ),
-
-                  // Error Message Box
-                  if (_errorMessage != null)
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(top: 10),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(color: const Color(0xFFFFEBEE), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFEF5350))),
-                      child: Row(children: [const Icon(Icons.error_outline, color: Color(0xFFD32F2F), size: 20), const SizedBox(width: 8), Expanded(child: Text(_errorMessage!, style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFFD32F2F))))]),
-                    ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 30),
                   Container(
                     width: double.infinity,
                     height: 55,
@@ -255,7 +219,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        // If loading, disable the tap
                         onTap: _isLoading ? null : _handleRegister,
                         borderRadius: BorderRadius.circular(30),
                         child: Center(
@@ -276,7 +239,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 15),
                   Text('OR', style: GoogleFonts.poppins(fontSize: 12, color: const Color(0xFF888888))),
                   const SizedBox(height: 15),
-                  // Google Button
                   Container(
                     width: double.infinity,
                     height: 55,
@@ -298,7 +260,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Footer
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
