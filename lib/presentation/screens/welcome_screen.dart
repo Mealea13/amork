@@ -20,7 +20,6 @@ class WelcomeScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Top Section - Hero Image
             Container(
               height: MediaQuery.of(context).size.height * 0.55,
               decoration: const BoxDecoration(
@@ -37,13 +36,11 @@ class WelcomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            // Middle Section - Text
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Title
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
@@ -64,8 +61,6 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
-                  // Subtitle
                   Text(
                     'A healthy life doesn\'t start with drastic changes—it begins with small, mindful bites that slowly transform how you feel, think, and live.',
                     textAlign: TextAlign.center,
@@ -78,8 +73,6 @@ class WelcomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
-            // Bottom Section - Action Button
             Padding(
               padding: const EdgeInsets.only(left: 30, right: 30, bottom: 40),
               child: Container(

@@ -2,11 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:quickalert/quickalert.dart';
 
-// ADJUST THIS IMPORT to match your folder structure
 import 'package:amork/data/services/api_service.dart';
 import 'register_screen.dart';
-import 'home_screen.dart';
+import 'main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,7 +22,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  String? _errorMessage;
 
   @override
   void dispose() {
@@ -31,51 +30,47 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _showSnackBar(String message, {bool isError = true}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _setError(String message) {
-    setState(() {
-      _errorMessage = message;
-    });
-  }
-
-  void _clearError() {
-    if (_errorMessage != null) {
-      setState(() {
-        _errorMessage = null;
-      });
-    }
-  }
-
   bool _validateInputs() {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
     if (email.isEmpty) {
-      _setError('Please enter your email');
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.warning,
+        title: 'Missing Input',
+        text: 'Please enter your email',
+      );
       return false;
     }
 
     if (!email.contains('@') || !email.contains('.')) {
-      _setError('Please enter a valid email address');
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Invalid Email',
+        text: 'Please enter a valid email address',
+      );
       return false;
     }
 
     if (password.isEmpty) {
-      _setError('Please enter your password');
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.warning,
+        title: 'Missing Input',
+        text: 'Please enter your password',
+      );
       return false;
     }
 
     if (!_agreeToTerms) {
-      _setError('Please agree to the Terms and Conditions');
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.info,
+        title: 'Terms & Conditions',
+        text: 'Please agree to the Terms and Conditions to continue.',
+      );
       return false;
     }
 
@@ -83,7 +78,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    _clearError();
+    FocusScope.of(context).unfocus();
+
     if (!_validateInputs()) return;
 
     setState(() {
@@ -99,27 +95,44 @@ class _LoginScreenState extends State<LoginScreen> {
       debugPrint("Login API Response: $response");
 
       if (response.containsKey('token')) {
-         final String token = response['token'];
-         final prefs = await SharedPreferences.getInstance();
-         await prefs.setString('auth_token', token);
-         if (response.containsKey('user') && response['user'] != null) {
-             await prefs.setString('user_id', response['user']['id'].toString());
-         }
-         debugPrint("Token saved: $token");
+        final String token = response['token'];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', token);
+        if (response.containsKey('user') && response['user'] != null) {
+          await prefs.setString('user_id', response['user']['id'].toString());
+        }
+        debugPrint("Token saved: $token");
       }
 
       if (mounted) {
-        _showSnackBar('Login successful!', isError: false);
-        Navigator.pushReplacement(
-          context,
-          CupertinoPageRoute(builder: (context) => const HomeScreen()),
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.success,
+          title: 'Success',
+          text: 'Login successful!',
+          autoCloseDuration: const Duration(seconds: 2),
+          showConfirmBtn: false,
         );
+
+        await Future.delayed(const Duration(seconds: 2));
+
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            CupertinoPageRoute(builder: (context) => const MainScreen()),
+          );
+        }
       }
 
     } catch (e) {
       if (mounted) {
         String errorMsg = e.toString().replaceAll("Exception: ", "");
-        _setError(errorMsg);
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Login Failed',
+          text: errorMsg,
+        );
       }
     } finally {
       if (mounted) {
@@ -131,7 +144,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleGoogleLogin() {
-    _showSnackBar('Google Sign-In coming soon!', isError: false);
+    QuickAlert.show(
+      context: context,
+      type: QuickAlertType.info,
+      title: 'Coming Soon',
+      text: 'Google Sign-In is not available yet!',
+    );
   }
 
   void _navigateToRegister() {
@@ -153,7 +171,6 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Header
                   Text(
                     'Login',
                     style: GoogleFonts.poppins(
@@ -171,11 +188,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  // Email Field
                   TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    onChanged: (_) => _clearError(),
                     decoration: InputDecoration(
                       hintText: 'Your Email',
                       hintStyle: GoogleFonts.poppins(color: const Color(0xFF888888)),
@@ -189,11 +204,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Password Field
                   TextField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
-                    onChanged: (_) => _clearError(),
                     decoration: InputDecoration(
                       hintText: 'Password',
                       hintStyle: GoogleFonts.poppins(color: const Color(0xFF888888)),
@@ -218,7 +231,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Visual Divider (Dashes)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
@@ -232,7 +244,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Terms Checkbox
                   Row(
                     children: [
                       Checkbox(
@@ -241,7 +252,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           setState(() {
                             _agreeToTerms = value ?? false;
                           });
-                          _clearError();
                         },
                         activeColor: Colors.teal,
                       ),
@@ -256,45 +266,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
-                  // Error Message
-                  if (_errorMessage != null)
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(top: 10),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFEBEE),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFFEF5350)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.error_outline,
-                            color: Color(0xFFD32F2F),
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _errorMessage!,
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                color: const Color(0xFFD32F2F),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 30),
                   Container(
                     width: double.infinity,
                     height: 55,
                     decoration: BoxDecoration(
                       color: _isLoading
-                        ? const Color(0xFFFFF3D6).withValues(alpha: 0.7)
-                        : const Color(0xFFFFF3D6),
+                          ? const Color(0xFFFFF3D6).withOpacity(0.7)
+                          : const Color(0xFFFFF3D6),
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: [
                         if (!_isLoading)
@@ -312,25 +291,27 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(30),
                         child: Center(
                           child: _isLoading
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(color: Color(0xFF1A1A1A), strokeWidth: 2.5)
-                              )
-                            : Text(
-                                'Log In',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF1A1A1A),
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF1A1A1A), 
+                                    strokeWidth: 2.5
+                                  ),
+                                )
+                              : Text(
+                                  'Log In',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF1A1A1A),
+                                  ),
                                 ),
-                              ),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 15),
-                  // OR Text
                   Text(
                     'OR',
                     style: GoogleFonts.poppins(
@@ -339,7 +320,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 15),
-                  // Google Button
                   Container(
                     width: double.infinity,
                     height: 55,
@@ -385,7 +365,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Footer
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
