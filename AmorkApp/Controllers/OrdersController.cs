@@ -20,7 +20,7 @@ public class OrdersController : ControllerBase
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetUserOrders(Guid userId)
     {
-        var orders = await _context.orders
+        var orders = await _context.Orders
             .Where(o => o.UserId == userId)
             .OrderByDescending(o => o.CreatedAt)
             .Select(o => new
@@ -30,7 +30,7 @@ public class OrdersController : ControllerBase
                 o.Status,
                 o.DeliveryAddress,
                 o.CreatedAt,
-                ItemCount = _context.orders.Count(oi => oi.OrderId == o.OrderId)
+                ItemCount = _context.Orders.Count(oi => oi.OrderId == o.OrderId)
             })
             .ToListAsync();
 
@@ -41,10 +41,10 @@ public class OrdersController : ControllerBase
     [HttpGet("{orderId}")]
     public async Task<IActionResult> GetOrderDetails(int orderId)
     {
-        var order = await _context.orders.FindAsync(orderId);
+        var order = await _context.Orders.FindAsync(orderId);
         if (order == null) return NotFound();
 
-        var items = await _context.orders
+        var items = await _context.Orders
             .Where(oi => oi.OrderId == orderId)
             .ToListAsync();
 
@@ -56,7 +56,7 @@ public class OrdersController : ControllerBase
     public async Task<IActionResult> PlaceOrder([FromBody] PlaceOrderRequest request)
     {
         // Get user's cart items
-        var cartItems = await _context.CartItem
+        var cartItems = await _context.CartItems
             .Where(c => c.UserId == request.UserId)
             .ToListAsync();
 
@@ -69,7 +69,7 @@ public class OrdersController : ControllerBase
 
         foreach (var cartItem in cartItems)
         {
-            var food = await _context.foods.FindAsync(cartItem.FoodId);
+            var food = await _context.Foods.FindAsync(cartItem.FoodId);
             if (food != null)
             {
                 totalAmount += food.Price * cartItem.Quantity;
@@ -94,7 +94,7 @@ public class OrdersController : ControllerBase
             Status = "pending"
         };
 
-        _context.orders.Add(order);
+        _context.Orders.Add(order);
         await _context.SaveChangesAsync();
 
         // Add order items
@@ -102,10 +102,10 @@ public class OrdersController : ControllerBase
         {
             item.OrderId = order.OrderId;
         }
-        _context.orders.AddRange(orderItems);
+        _context.Orders.AddRange(orderItems);
 
         // Clear cart
-        _context.CartItem.RemoveRange(cartItems);
+        _context.CartItems.RemoveRange(cartItems);
         await _context.SaveChangesAsync();
 
         return Ok(new { message = "Order placed successfully", orderId = order.OrderId });
@@ -115,7 +115,7 @@ public class OrdersController : ControllerBase
     [HttpPut("{orderId}/status")]
     public async Task<IActionResult> UpdateOrderStatus(int orderId, [FromBody] UpdateStatusRequest request)
     {
-        var order = await _context.orders.FindAsync(orderId);
+        var order = await _context.Orders.FindAsync(orderId);
         if (order == null) return NotFound();
 
         order.Status = request.Status;
@@ -127,7 +127,7 @@ public class OrdersController : ControllerBase
     [HttpDelete("{orderId}")]
     public async Task<IActionResult> CancelOrder(int orderId)
     {
-        var order = await _context.orders.FindAsync(orderId);
+        var order = await _context.Orders.FindAsync(orderId);
         if (order == null) return NotFound();
 
         if (order.Status == "delivering" || order.Status == "completed")

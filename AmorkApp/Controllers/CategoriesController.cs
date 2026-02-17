@@ -38,7 +38,7 @@ public class CategoriesController : ControllerBase
     [HttpGet("{id}/foods")]
     public async Task<IActionResult> GetFoodsByCategory(int id)
     {
-        var foods = await _context.foods
+        var foods = await _context.Foods
             .Where(f => f.CategoryId == id)
             .ToListAsync();
         return Ok(foods);

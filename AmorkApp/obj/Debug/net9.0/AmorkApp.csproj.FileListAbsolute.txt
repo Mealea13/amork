@@ -125,3 +125,4 @@ D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\refint\AmorkApp.dll
 D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.pdb
 D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.genruntimeconfig.cache
 D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\ref\AmorkApp.dll
+D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\AmorkApp.staticwebassets.runtime.json

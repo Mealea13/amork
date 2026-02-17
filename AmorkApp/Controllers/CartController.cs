@@ -20,14 +20,14 @@ public class CartController : ControllerBase
     [HttpGet("{userId}")]
     public async Task<IActionResult> GetCart(Guid userId)
     {
-        var cartItems = await _context.CartItem
+        var cartItems = await _context.CartItems
             .Where(c => c.UserId == userId)
             .Select(c => new
             {
                 c.CartItemId,
                 c.FoodId,
                 c.Quantity,
-                Food = _context.foods.FirstOrDefault(f => f.FoodId == c.FoodId)
+                Food = _context.Foods.FirstOrDefault(f => f.FoodId == c.FoodId)
             })
             .ToListAsync();
 
@@ -42,7 +42,7 @@ public class CartController : ControllerBase
     public async Task<IActionResult> AddToCart([FromBody] Cart cartItem)
     {
         // Check if item already exists in cart
-        var existingItem = await _context.CartItem
+        var existingItem = await _context.CartItems
             .FirstOrDefaultAsync(c => c.UserId == cartItem.UserId && c.FoodId == cartItem.FoodId);
 
         if (existingItem != null)
@@ -53,7 +53,7 @@ public class CartController : ControllerBase
         else
         {
             // Add new item to cart
-            _context.CartItem.Add(cartItem);
+            _context.CartItems.Add(cartItem);
         }
 
         await _context.SaveChangesAsync();
@@ -64,7 +64,7 @@ public class CartController : ControllerBase
     [HttpPut("update/{cartItemId}")]
     public async Task<IActionResult> UpdateQuantity(int cartItemId, [FromBody] UpdateQuantityRequest request)
     {
-        var cartItem = await _context.CartItem.FindAsync(cartItemId);
+        var cartItem = await _context.CartItems.FindAsync(cartItemId);
         if (cartItem == null) return NotFound();
 
         cartItem.Quantity = request.Quantity;
@@ -76,10 +76,10 @@ public class CartController : ControllerBase
     [HttpDelete("remove/{cartItemId}")]
     public async Task<IActionResult> RemoveFromCart(int cartItemId)
     {
-        var cartItem = await _context.CartItem.FindAsync(cartItemId);
+        var cartItem = await _context.CartItems.FindAsync(cartItemId);
         if (cartItem == null) return NotFound();
 
-        _context.CartItem.Remove(cartItem);
+        _context.CartItems.Remove(cartItem);
         await _context.SaveChangesAsync();
         return Ok(new { message = "Item removed from cart" });
     }
@@ -88,11 +88,11 @@ public class CartController : ControllerBase
     [HttpDelete("clear/{userId}")]
     public async Task<IActionResult> ClearCart(Guid userId)
     {
-        var cartItems = await _context.CartItem
+        var cartItems = await _context.CartItems
             .Where(c => c.UserId == userId)
             .ToListAsync();
 
-        _context.CartItem.RemoveRange(cartItems);
+        _context.CartItems.RemoveRange(cartItems);
         await _context.SaveChangesAsync();
         return Ok(new { message = "Cart cleared successfully" });
     }
