@@ -1,5 +1,5 @@
 class AppConfig {
-  static const String baseUrl = 'http://192.168.100.7:5000';
+  static const String baseUrl = 'http://10.180.126.159:5000';
   static const String authEndpoint = "$baseUrl/api/auth";
   static const String foodsEndpoint = "$baseUrl/api/foods";
   static const String cartEndpoint = "$baseUrl/api/cart";

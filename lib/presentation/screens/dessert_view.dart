@@ -132,7 +132,7 @@ class DessertView extends StatelessWidget {
                             ],
                           ),
                           GestureDetector(
-                            onTap: () => onAddToCart(food), 
+                            onTap: () => onAddToCart(food),
                             child: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.orange, borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.add, color: Colors.white, size: 18))
                           ),
                         ],
@@ -144,7 +144,7 @@ class DessertView extends StatelessWidget {
             },
           ),
         ),
-        const SizedBox(height: 25), 
+        const SizedBox(height: 25),
       ],
     );
   }

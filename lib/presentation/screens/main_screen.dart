@@ -8,8 +8,8 @@ import 'snack_view.dart';
 import 'cart_screen.dart';
 import 'profile_screen.dart';
 import 'order_screen.dart';   
-import 'search_screen.dart';      // NEW IMPORT
-import 'notification_screen.dart'; // NEW IMPORT
+import 'search_screen.dart';      
+import 'notification_screen.dart'; 
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -21,8 +21,11 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0; 
   String selectedCategory = "Food"; 
+  
+  // NOTE: Once connected to backend, this will be handled by CartProvider
   List<FoodModel> cart = [];
   
+  // NOTE: Once connected to backend, this will be fetched from /api/orders
   List<OrderModel> myOrders = [
     OrderModel(orderNumber: "#AMK-0988", date: "Yesterday, 06:15 PM", items: "1x Burger, 1x Coke", total: 6.00, status: "Completed"),
   ];
@@ -131,7 +134,6 @@ class _MainScreenState extends State<MainScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Pinned Header (NOW CLICKABLE!)
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
             child: Row(
@@ -146,7 +148,6 @@ class _MainScreenState extends State<MainScreen> {
                 ),
                 Row(
                   children: [
-                    // --- SEARCH BUTTON ---
                     GestureDetector(
                       onTap: () async {
                         final addedFood = await Navigator.push(context, MaterialPageRoute(builder: (_) => const SearchScreen()));
@@ -161,8 +162,6 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                     ),
                     const SizedBox(width: 15),
-
-                    // --- NOTIFICATION BUTTON ---
                     GestureDetector(
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationScreen()));
@@ -174,7 +173,6 @@ class _MainScreenState extends State<MainScreen> {
                           clipBehavior: Clip.none,
                           children: [
                             const Icon(Icons.notifications_none, size: 24),
-                            // Red Badge for Unread Notifications
                             Positioned(
                               right: 2, top: 2,
                               child: Container(
@@ -192,7 +190,6 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ),
 
-          // 2. Pinned Categories List
           SizedBox(
             height: 90,
             child: ListView(
@@ -207,7 +204,6 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ),
           
-          // 3. Dynamic Scrollable Body
           Expanded(child: _getCategoryView()),
         ],
       ),

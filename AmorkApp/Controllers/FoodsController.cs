@@ -20,7 +20,7 @@ public class FoodsController : ControllerBase
     [HttpGet("popular")]
     public async Task<IActionResult> GetPopular()
     {
-        var foods = await _context.foods.ToListAsync();
+        var foods = await _context.Foods.ToListAsync();
         return Ok(foods);
     }
 
@@ -30,7 +30,7 @@ public class FoodsController : ControllerBase
     {
         if (food == null) return BadRequest();
 
-        _context.foods.Add(food);
+        _context.Foods.Add(food);
         await _context.SaveChangesAsync();
         return Ok(new { message = "Successfully added!" });
     }
@@ -39,7 +39,7 @@ public class FoodsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] Food foodData)
     {
-        var food = await _context.foods.FindAsync(id);
+        var food = await _context.Foods.FindAsync(id);
         if (food == null) return NotFound();
         food.Name = foodData.Name;
         food.Price = foodData.Price;
@@ -51,9 +51,9 @@ public class FoodsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var food = await _context.foods.FindAsync(id);
+        var food = await _context.Foods.FindAsync(id);
         if (food == null) return NotFound();
-        _context.foods.Remove(food);
+        _context.Foods.Remove(food);
         await _context.SaveChangesAsync();
         return Ok(new { message = "Deleted successfully!" });
     }

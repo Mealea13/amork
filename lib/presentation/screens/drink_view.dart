@@ -10,18 +10,18 @@ class DrinkView extends StatelessWidget {
 
   final List<FoodModel> discountDrinks = [
     FoodModel(id: 201, name: "Fresh Lemonade", categoryId: 2, price: 1.00, originalPrice: 2.00, imageUrl: "assets/images/lemonade.png", description: "Cold refreshing drink", calories: 120, time: "2 min"),
-    FoodModel(id: 202, name: "Iced Coffee", categoryId: 2, price: 1.75, originalPrice: 3.50, imageUrl: "assets/images/iced_coffee.png", description: "Sweet iced coffee", calories: 200, time: "3 min"),
+    FoodModel(id: 202, name: "Iced Coffee", categoryId: 2, price: 1.75, originalPrice: 3.50, imageUrl: "assets/images/iced latte.png", description: "Sweet iced coffee", calories: 200, time: "3 min"),
     FoodModel(id: 203, name: "Coca Cola", categoryId: 2, price: 0.75, originalPrice: 1.50, imageUrl: "assets/images/coke.png", description: "Classic soda", calories: 140, time: "1 min"),
-    FoodModel(id: 204, name: "Brown Sugar Boba", categoryId: 2, price: 2.00, originalPrice: 4.00, imageUrl: "assets/images/boba.png", description: "Milk tea with sweet pearls", calories: 350, time: "5 min"),
-    FoodModel(id: 205, name: "Mango Smoothie", categoryId: 2, price: 1.50, originalPrice: 3.00, imageUrl: "assets/images/smoothie.png", description: "Blended fresh mango", calories: 250, time: "5 min"),
+    FoodModel(id: 204, name: "Brown Sugar Boba", categoryId: 2, price: 2.00, originalPrice: 4.00, imageUrl: "assets/images/Boba.png", description: "Milk tea with sweet pearls", calories: 350, time: "5 min"),
+    FoodModel(id: 205, name: "Mango Smoothie", categoryId: 2, price: 1.50, originalPrice: 3.00, imageUrl: "assets/images/smoothies.png", description: "Blended fresh mango", calories: 250, time: "5 min"),
   ];
 
   final List<FoodModel> popularDrinks = [
-    FoodModel(id: 206, name: "Green Tea", categoryId: 2, price: 2.50, imageUrl: "assets/images/green_tea.png", description: "Healthy hot green tea", calories: 0, time: "3 min"),
-    FoodModel(id: 207, name: "Matcha Latte", categoryId: 2, price: 4.50, imageUrl: "assets/images/matcha.png", description: "Premium Japanese matcha", calories: 220, time: "5 min"),
-    FoodModel(id: 208, name: "Americano", categoryId: 2, price: 2.50, imageUrl: "assets/images/americano.png", description: "Black coffee", calories: 10, time: "3 min"),
-    FoodModel(id: 209, name: "Cappuccino", categoryId: 2, price: 3.50, imageUrl: "assets/images/cappuccino.png", description: "Espresso with milk foam", calories: 150, time: "4 min"),
-    FoodModel(id: 210, name: "Orange Juice", categoryId: 2, price: 3.00, imageUrl: "assets/images/orange_juice.png", description: "Freshly squeezed", calories: 110, time: "2 min"),
+    FoodModel(id: 206, name: "Green Tea", categoryId: 2, price: 2.50, imageUrl: "assets/images/green-tea.png", description: "Healthy hot green tea", calories: 0, time: "3 min"),
+    FoodModel(id: 207, name: "Matcha Latte", categoryId: 2, price: 4.50, imageUrl: "assets/images/matcha-latte.png", description: "Premium Japanese matcha", calories: 220, time: "5 min"),
+    FoodModel(id: 208, name: "Americano", categoryId: 2, price: 2.50, imageUrl: "assets/images/pngtree-americano-coffee-.png", description: "Black coffee", calories: 10, time: "3 min"),
+    FoodModel(id: 209, name: "Cappuccino", categoryId: 2, price: 3.50, imageUrl: "assets/images/coffee-cappuccino.png", description: "Espresso with milk foam", calories: 150, time: "4 min"),
+    FoodModel(id: 210, name: "Orange Juice", categoryId: 2, price: 3.00, imageUrl: "assets/images/orange-juice.png", description: "Freshly squeezed", calories: 110, time: "2 min"),
   ];
 
   final List<FoodModel> eventDrinks = [
@@ -34,10 +34,10 @@ class DrinkView extends StatelessWidget {
 
   final List<FoodModel> bestSellingDrinks = [
     FoodModel(id: 216, name: "Fresh Coconut", categoryId: 2, price: 2.00, imageUrl: "assets/images/coconut.png", description: "Whole fresh coconut", calories: 50, time: "1 min"),
-    FoodModel(id: 217, name: "Passion Fruit", categoryId: 2, price: 3.00, imageUrl: "assets/images/passion_fruit.png", description: "Sweet and sour tropical drink", calories: 130, time: "3 min"),
+    FoodModel(id: 217, name: "Passion Fruit", categoryId: 2, price: 3.00, imageUrl: "assets/images/passion_fruit_juice.png", description: "Sweet and sour tropical drink", calories: 130, time: "3 min"),
     FoodModel(id: 218, name: "Club Soda", categoryId: 2, price: 1.00, imageUrl: "assets/images/soda.png", description: "Sparkling water", calories: 0, time: "1 min"),
     FoodModel(id: 219, name: "Mineral Water", categoryId: 2, price: 0.50, imageUrl: "assets/images/water.png", description: "Bottled water", calories: 0, time: "1 min"),
-    FoodModel(id: 220, name: "Energy Drink", categoryId: 2, price: 2.50, imageUrl: "assets/images/red_bull.png", description: "Red Bull energy", calories: 110, time: "1 min"),
+    FoodModel(id: 220, name: "Energy Drink", categoryId: 2, price: 2.50, imageUrl: "assets/images/Energy_drink.png", description: "Red Bull energy", calories: 110, time: "1 min"),
   ];
 
   @override

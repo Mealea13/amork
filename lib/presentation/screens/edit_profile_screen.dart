@@ -1,13 +1,16 @@
-import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data'; 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // Needed to pick the image here too!
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http; // NEW: For API calls
+import 'package:shared_preferences/shared_preferences.dart'; // NEW: To get User ID & Token
 
 class EditProfileScreen extends StatefulWidget {
   final String name;
   final String member;
   final String phone;
   final String email;
-  final File? image; // Receive current image
+  final Uint8List? imageBytes; 
 
   const EditProfileScreen({
     super.key,
@@ -15,151 +18,116 @@ class EditProfileScreen extends StatefulWidget {
     required this.member,
     required this.phone,
     required this.email,
-    this.image,
+    this.imageBytes,
   });
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
+// ... imports stay the same ...
+
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  // Controllers to edit text
   late TextEditingController nameController;
   late TextEditingController phoneController;
   late TextEditingController emailController;
-  
-  // Variable to hold the potentially new image
-  File? _displayImage;
+  Uint8List? _displayImage; 
+  bool _imageChanged = false;
   final ImagePicker _picker = ImagePicker();
+
+  // ✅ Match your .NET server IP
+  final String serverUrl = "http://10.180.126.159:5000";
 
   @override
   void initState() {
     super.initState();
-    // Initialize controllers with existing data
     nameController = TextEditingController(text: widget.name);
     phoneController = TextEditingController(text: widget.phone);
     emailController = TextEditingController(text: widget.email);
-    
-    // Initialize display image with the current image
-    _displayImage = widget.image;
+    _displayImage = widget.imageBytes;
   }
 
-  @override
-  void dispose() {
-    nameController.dispose();
-    phoneController.dispose();
-    emailController.dispose();
-    super.dispose();
-  }
-
-  // Function to pick image in edit screen
   Future<void> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes(); 
       setState(() {
-        _displayImage = File(pickedFile.path); // Update the image being shown right now
+        _displayImage = bytes; 
+        _imageChanged = true;
       });
+    }
+  }
+
+  Future<void> _saveProfile() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator(color: Colors.orange)),
+    );
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String userId = prefs.getString('user_id') ?? "101abf10-82c3-4b4a-a2fd-0fd2f25591b0";
+
+      // 1. Update Text
+      final profileResp = await http.put(
+        Uri.parse('$serverUrl/api/profile/$userId'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'Fullname': nameController.text,
+          'Phone': phoneController.text,
+          'Email': emailController.text,
+        }),
+      );
+
+      if (profileResp.statusCode != 200) throw Exception("Failed to update text");
+
+      // 2. Upload Image if changed
+      if (_displayImage != null && _imageChanged) {
+        var request = http.MultipartRequest('POST', Uri.parse('$serverUrl/api/profile/upload-image/$userId'));
+        request.files.add(http.MultipartFile.fromBytes('image', _displayImage!, filename: 'profile.png'));
+        await request.send();
+      }
+
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading
+        Navigator.pop(context, true); // Return 'true' to trigger refresh
+      }
+    } catch (e) {
+      if (context.mounted) Navigator.pop(context);
+      debugPrint("Error saving: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // FIX 1: Force the beige background color explicitly
       backgroundColor: const Color(0xFFF9F6F0), 
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        // Ensure back arrow is black so it's visible on beige
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text("Edit Profile", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text("Edit Profile"), centerTitle: true, backgroundColor: Colors.transparent, elevation: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-        physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
-            const SizedBox(height: 20),
-            // FIX 2: Clickable Image Picker UI
             GestureDetector(
               onTap: _pickImage,
-              child: Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  CircleAvatar(
-                    radius: 70,
-                    backgroundColor: const Color(0xFFE7DCC3),
-                    // Show the new image if picked, otherwise show the old one, otherwise null
-                    backgroundImage: _displayImage != null ? FileImage(_displayImage!) : null,
-                    child: _displayImage == null
-                        ? const Icon(Icons.person, size: 70, color: Colors.white)
-                        : null,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: Colors.orange,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
-                  ),
-                ],
+              child: CircleAvatar(
+                radius: 70,
+                backgroundImage: _displayImage != null ? MemoryImage(_displayImage!) : null,
+                child: _displayImage == null ? const Icon(Icons.person, size: 70) : null,
               ),
             ),
-            const SizedBox(height: 40),
-
-            // Edit Text Fields (Using dark text color for visibility)
+            const SizedBox(height: 30),
             _buildTextField("Name", nameController),
-            const SizedBox(height: 20),
-            // Member field is usually read-only, so we just show it
-             Container(
-               width: double.infinity,
-               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-               decoration: BoxDecoration(
-                 color: Colors.black.withOpacity(0.05), // Slightly darker background for read-only
-                 borderRadius: BorderRadius.circular(15),
-                 border: Border.all(color: Colors.black12)
-               ),
-               child: Column(
-                 crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Member Type (Read-only)", style: TextStyle(color: Colors.grey, fontSize: 12)),
-                    const SizedBox(height: 5),
-                    Text(widget.member, style: const TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-               ),
-             ),
             const SizedBox(height: 20),
             _buildTextField("Phone", phoneController),
             const SizedBox(height: 20),
             _buildTextField("Email", emailController),
-
-            const SizedBox(height: 50),
-
-            // Save Button
+            const SizedBox(height: 40),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                minimumSize: const Size(double.infinity, 55),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-              ),
-              onPressed: () {
-                // FIX 3: Pass the updated data (including the new image) back to the previous screen
-                Navigator.pop(context, {
-                  'name': nameController.text,
-                  'member': widget.member,
-                  'phone': phoneController.text,
-                  'email': emailController.text,
-                  'image': _displayImage, // Pass the new file back
-                });
-              },
-              child: const Text("Save Changes", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-            ),
-             const SizedBox(height: 30),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, minimumSize: const Size(double.infinity, 50)),
+              onPressed: _saveProfile,
+              child: const Text("Save Changes", style: TextStyle(color: Colors.white)),
+            )
           ],
         ),
       ),
@@ -167,33 +135,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildTextField(String label, TextEditingController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          style: const TextStyle(color: Colors.black), // Ensure input text is black
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-               borderRadius: BorderRadius.circular(15),
-               borderSide: const BorderSide(color: Colors.black12),
-            ),
-            focusedBorder: OutlineInputBorder(
-               borderRadius: BorderRadius.circular(15),
-               borderSide: const BorderSide(color: Colors.orange),
-            )
-          ),
-        ),
-      ],
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(labelText: label, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15))),
     );
   }
 }

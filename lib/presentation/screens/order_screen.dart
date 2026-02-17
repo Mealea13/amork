@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'order_detail_screen.dart'; // NEW: Import the detail screen!
 
 // A simple model to hold our order data
 class OrderModel {
@@ -56,13 +57,22 @@ class OrderScreen extends StatelessWidget {
                     final order = orders[index];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 15),
-                      child: _orderCard(
-                        orderNumber: order.orderNumber,
-                        date: order.date,
-                        items: order.items,
-                        total: "\$${order.total.toStringAsFixed(2)}",
-                        status: order.status,
-                        statusColor: order.status == "Delivering" ? Colors.orange : Colors.green,
+                      // NEW: Wrap the card in a GestureDetector
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => OrderDetailScreen(order: order)),
+                          );
+                        },
+                        child: _orderCard(
+                          orderNumber: order.orderNumber,
+                          date: order.date,
+                          items: order.items,
+                          total: "\$${order.total.toStringAsFixed(2)}",
+                          status: order.status,
+                          statusColor: order.status == "Delivering" ? Colors.orange : Colors.green,
+                        ),
                       ),
                     );
                   },
@@ -120,8 +130,9 @@ class OrderScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Text(items, style: const TextStyle(fontSize: 13, color: Colors.black87)),
+                child: Text(items, style: const TextStyle(fontSize: 13, color: Colors.black87), maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
+              const SizedBox(width: 10),
               Text(total, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.orange)),
             ],
           )
