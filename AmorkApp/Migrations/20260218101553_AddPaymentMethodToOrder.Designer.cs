@@ -3,6 +3,7 @@ using System;
 using AmorkApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AmorkApp.Migrations
 {
     [DbContext(typeof(AmorkDbContext))]
-    partial class AmorkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260218101553_AddPaymentMethodToOrder")]
+    partial class AddPaymentMethodToOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

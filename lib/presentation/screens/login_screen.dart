@@ -77,71 +77,83 @@ class _LoginScreenState extends State<LoginScreen> {
     return true;
   }
 
-  Future<void> _handleLogin() async {
-    FocusScope.of(context).unfocus();
+ Future<void> _handleLogin() async {
+  FocusScope.of(context).unfocus();
+  if (!_validateInputs()) return;
 
-    if (!_validateInputs()) return;
+  setState(() => _isLoading = true);
 
-    setState(() {
-      _isLoading = true;
-    });
+  try {
+    final apiService = ApiService();
+    final response = await apiService.login(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
 
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
+    // ✅ DEBUG - see what login returns
+    debugPrint('=== LOGIN RESPONSE ===');
+    debugPrint(response.toString());
 
-    try {
-      final apiService = ApiService();
-      final response = await apiService.login(email, password);
-      debugPrint("Login API Response: $response");
+    final prefs = await SharedPreferences.getInstance();
 
-      if (response.containsKey('token')) {
-        final String token = response['token'];
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('auth_token', token);
-        if (response.containsKey('user') && response['user'] != null) {
-          await prefs.setString('user_id', response['user']['id'].toString());
-        }
-        debugPrint("Token saved: $token");
-      }
+    // ✅ Save token
+    final token = response['token'] ?? response['access_token'] ?? '';
+    debugPrint('Saving token: $token');
+    await prefs.setString('auth_token', token.toString());
 
-      if (mounted) {
-        QuickAlert.show(
-          context: context,
-          type: QuickAlertType.success,
-          title: 'Success',
-          text: 'Login successful!',
-          autoCloseDuration: const Duration(seconds: 2),
-          showConfirmBtn: false,
-        );
+    // ✅ Save user id
+    final user = response['user'] ?? response['User'] ?? {};
+    final userId = user['id'] ?? user['userId'] ?? user['user_id'] ?? '';
+    debugPrint('Saving userId: $userId');
+    await prefs.setString('user_id', userId.toString());
 
-        await Future.delayed(const Duration(seconds: 2));
-
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            CupertinoPageRoute(builder: (context) => const MainScreen()),
-          );
-        }
-      }
-
-    } catch (e) {
-      if (mounted) {
-        String errorMsg = e.toString().replaceAll("Exception: ", "");
-        QuickAlert.show(
-          context: context,
-          type: QuickAlertType.error,
-          title: 'Login Failed',
-          text: errorMsg,
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    if (token.isEmpty) {
+      throw Exception('No token received from server');
     }
+
+    if (mounted) {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.success,
+        title: 'Welcome Back!',
+        text: 'You have logged in successfully.',
+      );
+      await Future.delayed(const Duration(seconds: 1));
+      Navigator.pushReplacement(
+        context,
+        CupertinoPageRoute(builder: (_) => const MainScreen()),
+      );
+    }
+  } catch (e) {
+    if (mounted) {
+      String errorMessage;
+      final raw = e.toString().toLowerCase();
+
+      if (raw.contains('invalid email or password')) {
+        errorMessage = 'Incorrect email or password. Please try again.';
+      } else if (raw.contains('socketexception') ||
+          raw.contains('connection refused') ||
+          raw.contains('network')) {
+        errorMessage = 'Cannot connect to server. Please check your internet connection.';
+      } else if (raw.contains('timeout')) {
+        errorMessage = 'Connection timed out. Please try again.';
+      } else if (raw.contains('no token')) {
+        errorMessage = 'Login error. Please try again.';
+      } else {
+        errorMessage = 'Something went wrong. Please try again later.';
+      }
+
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Login Failed',
+        text: errorMessage,
+      );
+    }
+  } finally {
+    if (mounted) setState(() => _isLoading = false);
   }
+}
 
   void _handleGoogleLogin() {
     QuickAlert.show(

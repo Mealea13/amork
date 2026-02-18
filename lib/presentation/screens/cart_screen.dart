@@ -1,13 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:amork/data/models/food_model.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:amork/core/app_config.dart';
 import 'payment_screen.dart';
 
 class CartScreen extends StatefulWidget {
-  final List<FoodModel> cart;
-  final Function(int) onRemoveItem;
   final VoidCallback onCheckoutSuccess;
 
-  const CartScreen({super.key, required this.cart, required this.onRemoveItem, required this.onCheckoutSuccess});
+  const CartScreen({super.key, required this.onCheckoutSuccess});
 
   @override
   State<CartScreen> createState() => _CartScreenState();
@@ -15,8 +16,112 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   final TextEditingController instructionController = TextEditingController();
+  List<dynamic> cartItems = [];
+  bool isLoading = true;
+  double total = 0.0;
 
-  double get total => widget.cart.fold(0.0, (sum, item) => sum + item.price);
+  @override
+  void initState() {
+    super.initState();
+    _fetchCart();
+  }
+
+  Future<String?> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('auth_token');
+  }
+
+  Future<void> _fetchCart() async {
+    setState(() => isLoading = true);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      final response = await http.get(
+        Uri.parse(AppConfig.cartEndpoint),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          cartItems = data['items'] ?? [];
+          total = (data['total'] ?? 0.0).toDouble();
+        });
+      } else {
+        setState(() {
+          cartItems = [];
+          total = 0.0;
+        });
+      }
+    } catch (e) {
+      debugPrint('Fetch cart error: $e');
+      setState(() {
+        cartItems = [];
+        total = 0.0;
+      });
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _removeItem(dynamic cartItemId) async {
+    try {
+      final token = await _getToken();
+      final response = await http.delete(
+        Uri.parse('${AppConfig.cartEndpoint}/$cartItemId'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        _fetchCart();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Item removed'), backgroundColor: Colors.red, duration: Duration(seconds: 1)),
+        );
+      }
+    } catch (e) {
+      debugPrint('Remove item error: $e');
+    }
+  }
+
+  Future<void> _clearCart() async {
+    try {
+      final token = await _getToken();
+      await http.delete(
+        Uri.parse('${AppConfig.cartEndpoint}/clear'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+    } catch (e) {
+      debugPrint('Clear cart error: $e');
+    }
+  }
+
+  Future<void> _updateQuantity(dynamic cartItemId, int newQuantity) async {
+    if (newQuantity < 1) {
+      _removeItem(cartItemId);
+      return;
+    }
+    try {
+      final token = await _getToken();
+      await http.put(
+        Uri.parse('${AppConfig.cartEndpoint}/$cartItemId'),
+        headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
+        body: jsonEncode({'quantity': newQuantity}),
+      );
+      _fetchCart();
+    } catch (e) {
+      debugPrint('Update quantity error: $e');
+    }
+  }
+
+  // Convert cartItems to the format PaymentScreen expects
+  List<Map<String, dynamic>> _getCartItemsForPayment() {
+    return cartItems.map<Map<String, dynamic>>((item) => {
+      'food_id':   item['food_id'],
+      'food_name': item['food_name'] ?? item['name'] ?? '',
+      'quantity':  item['quantity'] ?? 1,
+      'price':     (item['price'] ?? 0.0).toDouble(),
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,77 +133,170 @@ class _CartScreenState extends State<CartScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("My Cart (${widget.cart.length})", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("My Cart (${cartItems.length})",
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  if (cartItems.isNotEmpty)
+                    GestureDetector(
+                      onTap: () async {
+                        await _clearCart();
+                        _fetchCart();
+                      },
+                      child: const Text("Clear All", style: TextStyle(color: Colors.red, fontSize: 13)),
+                    ),
+                ],
+              ),
               const SizedBox(height: 20),
-              
-              if (widget.cart.isEmpty)
-                const Expanded(child: Center(child: Text("Your cart is empty.", style: TextStyle(color: Colors.grey, fontSize: 16))))
+
+              if (isLoading)
+                const Expanded(child: Center(child: CircularProgressIndicator(color: Colors.orange)))
+              else if (cartItems.isEmpty)
+                const Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey),
+                        SizedBox(height: 15),
+                        Text("Your cart is empty.", style: TextStyle(color: Colors.grey, fontSize: 16)),
+                      ],
+                    ),
+                  ),
+                )
               else
                 Expanded(
-                  child: ListView.builder(
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: widget.cart.length,
-                    itemBuilder: (context, index) {
-                      final item = widget.cart[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 15),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 5))]),
-                        child: Row(
-                          children: [
-                            Image.asset(item.imageUrl, height: 60, width: 60),
-                            const SizedBox(width: 15),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                  child: RefreshIndicator(
+                    onRefresh: _fetchCart,
+                    child: ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: cartItems.length,
+                      itemBuilder: (context, index) {
+                        final item = cartItems[index];
+                        final itemId = item['id'] ?? item['cart_item_id'];
+                        final int qty = item['quantity'] ?? 1;
+                        final double price = (item['price'] ?? 0.0).toDouble();
+                        final String imageUrl = item['image_url'] ?? '';
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 15),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 5))],
+                          ),
+                          child: Row(
+                            children: [
+                              // Food Image
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: imageUrl.startsWith('http')
+                                    ? Image.network(imageUrl, height: 60, width: 60, fit: BoxFit.cover,
+                                        errorBuilder: (c, e, s) => const Icon(Icons.fastfood, size: 60))
+                                    : Image.asset(imageUrl, height: 60, width: 60, fit: BoxFit.cover,
+                                        errorBuilder: (c, e, s) => const Icon(Icons.fastfood, size: 60)),
+                              ),
+                              const SizedBox(width: 12),
+                              // Name & Price
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(item['food_name'] ?? item['name'] ?? 'Unknown',
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                    const SizedBox(height: 4),
+                                    Text("\$${(price * qty).toStringAsFixed(2)}",
+                                        style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                              ),
+                              // Quantity Controls
+                              Row(
                                 children: [
-                                  Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  const SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      if (item.originalPrice != null) ...[
-                                        Text("\$${item.originalPrice!.toStringAsFixed(2)}", style: const TextStyle(decoration: TextDecoration.lineThrough, color: Colors.grey, fontSize: 12)),
-                                        const SizedBox(width: 5),
-                                      ],
-                                      Text("\$${item.price.toStringAsFixed(2)}", style: TextStyle(color: item.originalPrice != null ? Colors.red : Colors.orange, fontWeight: FontWeight.bold)),
-                                    ],
+                                  _qtyButton(Icons.remove, () => _updateQuantity(itemId, qty - 1)),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                    child: Text('$qty', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                                   ),
+                                  _qtyButton(Icons.add, () => _updateQuantity(itemId, qty + 1)),
                                 ],
                               ),
-                            ),
-                            IconButton(icon: const Icon(Icons.close, color: Colors.red, size: 20), onPressed: () => widget.onRemoveItem(index)),
-                          ],
-                        ),
-                      );
-                    },
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
-                
-              if (widget.cart.isNotEmpty) ...[
+
+              if (cartItems.isNotEmpty) ...[
                 const Text("Order Instructions", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                 const SizedBox(height: 8),
-                TextField(controller: instructionController, maxLines: 2, decoration: InputDecoration(hintText: "Add special instructions...", filled: true, fillColor: Colors.white, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none))),
-                const SizedBox(height: 25),
+                TextField(
+                  controller: instructionController,
+                  maxLines: 2,
+                  decoration: InputDecoration(
+                    hintText: "Add special instructions...",
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+                  ),
+                ),
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text("Total:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                    Text("\$${total.toStringAsFixed(2)}", style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 18)),
+                    Text("\$${total.toStringAsFixed(2)}",
+                        style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 18)),
                   ],
                 ),
-                const SizedBox(height: 25),
+                const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () async {
-                    final success = await Navigator.push(context, MaterialPageRoute(builder: (_) => PaymentScreen(total: total)));
-                    if (success == true) widget.onCheckoutSuccess();
+                    // ✅ FIXED: now passes cartItems to PaymentScreen
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PaymentScreen(
+                          total: total,
+                          cartItems: _getCartItemsForPayment(),
+                        ),
+                      ),
+                    );
+                    // Refresh cart and notify parent after returning
+                    _fetchCart();
+                    widget.onCheckoutSuccess();
                   },
-                  child: Container(height: 55, decoration: BoxDecoration(color: const Color(0xFFF1E6D3), borderRadius: BorderRadius.circular(20)), alignment: Alignment.center, child: const Text("Checkout", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                  child: Container(
+                    height: 55,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1E6D3),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text("Checkout",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  ),
                 ),
                 const SizedBox(height: 10),
-              ]
+              ],
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _qtyButton(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 28, height: 28,
+        decoration: BoxDecoration(color: const Color(0xFFF1E6D3), borderRadius: BorderRadius.circular(8)),
+        child: Icon(icon, size: 16),
       ),
     );
   }

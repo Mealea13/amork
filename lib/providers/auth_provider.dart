@@ -20,7 +20,7 @@ class AuthProvider with ChangeNotifier {
     final userId = prefs.getString('userId');
     if (userId != null) {
       try {
-        _currentUser = await _apiService.getUserProfile(userId);
+        _currentUser = await _apiService.getUserProfile();
         notifyListeners();
       } catch (e) {
         await logout();

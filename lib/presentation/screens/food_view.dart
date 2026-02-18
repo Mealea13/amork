@@ -9,7 +9,7 @@ class FoodView extends StatelessWidget {
   FoodView({super.key, required this.onAddToCart});
 
   final List<FoodModel> popularFoods = [
-    FoodModel(id: 1, name: "Avocado nido Salad", categoryId: 1, price: 4.05, imageUrl: "assets/images/salad.png", description: "Healthy and fresh green salad", calories: 150, time: "10 min"),
+    FoodModel(id: 1, name: "Avocado nido Salad", categoryId: 1, price: 4.05, imageUrl: "assets/images/Salad.png", description: "Healthy and fresh green salad", calories: 150, time: "10 min"),
     FoodModel(id: 2, name: "Cambodia Fish Amork", categoryId: 1, price: 6.00, imageUrl: "assets/images/amork.png", description: "Traditional Cambodian dish", calories: 350, time: "25 min"),
     FoodModel(id: 101, name: "Kuy Teav", categoryId: 1, price: 3.50, imageUrl: "assets/images/Kuy teav.png", description: "Pork broth noodle soup", calories: 400, time: "15 min"),
     FoodModel(id: 102, name: "Papaya Salad", categoryId: 1, price: 2.50, imageUrl: "assets/images/Papaya Salad.png", description: "Spicy and sour green papaya", calories: 120, time: "10 min"),

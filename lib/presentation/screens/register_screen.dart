@@ -100,7 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           context: context,
           type: QuickAlertType.error,
           title: 'Registration Failed',
-          text: e.toString().replaceAll("Exception: ", ""),
+          text: 'Something went wrong. Please try again.',
         );
       }
     } finally {

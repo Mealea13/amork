@@ -1,143 +1,257 @@
 import 'dart:convert';
-import 'dart:typed_data'; 
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http; // NEW: For API calls
-import 'package:shared_preferences/shared_preferences.dart'; // NEW: To get User ID & Token
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:amork/core/app_config.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final String name;
-  final String member;
   final String phone;
   final String email;
-  final Uint8List? imageBytes; 
+  final String member;
+  final String? imageUrl;
 
   const EditProfileScreen({
     super.key,
     required this.name,
-    required this.member,
     required this.phone,
     required this.email,
-    this.imageBytes,
+    required this.member,
+    this.imageUrl,
   });
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-// ... imports stay the same ...
-
 class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController nameController;
   late TextEditingController phoneController;
   late TextEditingController emailController;
-  Uint8List? _displayImage; 
-  bool _imageChanged = false;
-  final ImagePicker _picker = ImagePicker();
 
-  // ✅ Match your .NET server IP
-  final String serverUrl = "http://10.180.126.159:5000";
+  Uint8List? _pickedImageBytes;
+  bool _imageChanged = false;
+  bool _isSaving = false;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(text: widget.name);
+    nameController  = TextEditingController(text: widget.name);
     phoneController = TextEditingController(text: widget.phone);
     emailController = TextEditingController(text: widget.email);
-    _displayImage = widget.imageBytes;
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    emailController.dispose();
+    super.dispose();
   }
 
   Future<void> _pickImage() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
     if (pickedFile != null) {
-      final bytes = await pickedFile.readAsBytes(); 
+      final bytes = await pickedFile.readAsBytes();
       setState(() {
-        _displayImage = bytes; 
+        _pickedImageBytes = bytes;
         _imageChanged = true;
       });
     }
   }
 
   Future<void> _saveProfile() async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator(color: Colors.orange)),
-    );
+    if (nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Name cannot be empty'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final String userId = prefs.getString('user_id') ?? "101abf10-82c3-4b4a-a2fd-0fd2f25591b0";
+      final String? userId = prefs.getString('user_id');
+      final String? token  = prefs.getString('auth_token');
 
-      // 1. Update Text
+      if (userId == null) throw Exception("Not logged in");
+
+      // ✅ FIXED: lowercase keys + Authorization header
       final profileResp = await http.put(
-        Uri.parse('$serverUrl/api/profile/$userId'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('${AppConfig.profileEndpoint}/$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',   // ✅ Added auth header
+        },
         body: jsonEncode({
-          'Fullname': nameController.text,
-          'Phone': phoneController.text,
-          'Email': emailController.text,
+          'fullname': nameController.text.trim(),  // ✅ lowercase
+          'phone':    phoneController.text.trim(),  // ✅ lowercase
+          'email':    emailController.text.trim(),  // ✅ lowercase
         }),
       );
 
-      if (profileResp.statusCode != 200) throw Exception("Failed to update text");
+      debugPrint('Update profile: ${profileResp.statusCode} ${profileResp.body}');
 
-      // 2. Upload Image if changed
-      if (_displayImage != null && _imageChanged) {
-        var request = http.MultipartRequest('POST', Uri.parse('$serverUrl/api/profile/upload-image/$userId'));
-        request.files.add(http.MultipartFile.fromBytes('image', _displayImage!, filename: 'profile.png'));
+      if (profileResp.statusCode != 200) {
+        throw Exception("Failed: ${profileResp.body}");
+      }
+
+      // Upload image if changed
+      if (_pickedImageBytes != null && _imageChanged) {
+        var request = http.MultipartRequest(
+          'POST',
+          Uri.parse('${AppConfig.baseUrl}/api/profile/upload-image/$userId'),
+        );
+        request.headers['Authorization'] = 'Bearer $token';
+        request.files.add(http.MultipartFile.fromBytes(
+          'image', _pickedImageBytes!, filename: 'profile.png',
+        ));
         await request.send();
       }
 
-      if (context.mounted) {
-        Navigator.pop(context); // Close loading
-        Navigator.pop(context, true); // Return 'true' to trigger refresh
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile saved! ✅'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 1),
+          ),
+        );
+        await Future.delayed(const Duration(milliseconds: 600));
+        Navigator.pop(context, true); // ✅ true = refresh profile screen
       }
     } catch (e) {
-      if (context.mounted) Navigator.pop(context);
-      debugPrint("Error saving: $e");
+      debugPrint('Save error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Save failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F6F0), 
-      appBar: AppBar(title: const Text("Edit Profile"), centerTitle: true, backgroundColor: Colors.transparent, elevation: 0),
+      backgroundColor: const Color(0xFFF9F6F0),
+      appBar: AppBar(
+        title: const Text("Edit Profile", style: TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            // Profile photo
             GestureDetector(
               onTap: _pickImage,
-              child: CircleAvatar(
-                radius: 70,
-                backgroundImage: _displayImage != null ? MemoryImage(_displayImage!) : null,
-                child: _displayImage == null ? const Icon(Icons.person, size: 70) : null,
+              child: Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  CircleAvatar(
+                    radius: 70,
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage: _imageChanged
+                        ? MemoryImage(_pickedImageBytes!) as ImageProvider
+                        : (widget.imageUrl != null ? NetworkImage(widget.imageUrl!) : null),
+                    child: (!_imageChanged && widget.imageUrl == null)
+                        ? const Icon(Icons.person, size: 60, color: Colors.white)
+                        : null,
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(color: Colors.orange, shape: BoxShape.circle),
+                    child: const Icon(Icons.camera_alt, size: 18, color: Colors.white),
+                  ),
+                ],
               ),
             ),
+            const SizedBox(height: 8),
+            const Text("Tap to change photo", style: TextStyle(color: Colors.grey, fontSize: 12)),
             const SizedBox(height: 30),
-            _buildTextField("Name", nameController),
-            const SizedBox(height: 20),
-            _buildTextField("Phone", phoneController),
-            const SizedBox(height: 20),
-            _buildTextField("Email", emailController),
+
+            _buildTextField("Full Name",     nameController,  Icons.person),
+            const SizedBox(height: 15),
+            _buildTextField("Phone Number",  phoneController, Icons.phone,
+                keyboardType: TextInputType.phone),
+            const SizedBox(height: 15),
+            _buildTextField("Email Address", emailController, Icons.email,
+                keyboardType: TextInputType.emailAddress),
+
+            // Membership — read only
+            const SizedBox(height: 15),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(15)),
+              child: Row(
+                children: [
+                  const Icon(Icons.card_membership, color: Colors.orange),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Membership", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                      Text(widget.member,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  const Spacer(),
+                  const Text("Auto-calculated", style: TextStyle(color: Colors.grey, fontSize: 11)),
+                ],
+              ),
+            ),
+
             const SizedBox(height: 40),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, minimumSize: const Size(double.infinity, 50)),
-              onPressed: _saveProfile,
-              child: const Text("Save Changes", style: TextStyle(color: Colors.white)),
-            )
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                minimumSize: const Size(double.infinity, 55),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              ),
+              onPressed: _isSaving ? null : _saveProfile,
+              child: _isSaving
+                  ? const SizedBox(
+                      height: 24, width: 24,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    )
+                  : const Text("Save Changes",
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller) {
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller,
+    IconData icon, {
+    TextInputType keyboardType = TextInputType.text,
+  }) {
     return TextField(
       controller: controller,
-      decoration: InputDecoration(labelText: label, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15))),
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: Colors.orange),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Colors.orange, width: 2),
+        ),
+      ),
     );
   }
 }

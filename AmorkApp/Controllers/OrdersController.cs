@@ -2,11 +2,15 @@ using AmorkApp.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AmorkApp.Models;
+using System.Security.Claims;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AmorkApp.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/orders")]
+[Authorize]
 public class OrdersController : ControllerBase
 {
     private readonly AmorkDbContext _context;
@@ -16,138 +20,154 @@ public class OrdersController : ControllerBase
         _context = context;
     }
 
-    // GET: api/orders/user/{userId}
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetUserOrders(Guid userId)
+    // POST /api/orders
+    [HttpPost]
+    public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
     {
+        var userId = GetUserIdFromToken();
+        if (userId == null) return Unauthorized();
+
+        var orderNumber = $"AMK{DateTime.UtcNow:MMddHHmmss}";
+        var subtotal = request.Items?.Sum(i => i.Price * i.Quantity) ?? request.Total;
+
+        var order = new Order
+        {
+            OrderId       = Guid.NewGuid(),
+            UserId        = userId.Value,
+            OrderNumber   = orderNumber,
+            Status        = "confirmed",
+            PaymentMethod = request.PaymentMethod ?? "cash_on_delivery",
+            PaymentStatus = "paid",
+            DeliveryStreet = request.DeliveryAddress,
+            DeliveryPhone  = request.Phone,
+            Note           = request.Notes,
+            Subtotal       = subtotal,
+            DeliveryFee    = 1.00,
+            Tax            = 0.00,
+            Discount       = 0.00,
+            Total          = subtotal + 1.00,
+            CreatedAt      = DateTime.UtcNow,
+            UpdatedAt      = DateTime.UtcNow,
+            OrderItems     = request.Items?.Select(i => new OrderItem
+            {
+                OrderItemId          = Guid.NewGuid(),
+                FoodId               = i.FoodId,
+                FoodName             = i.FoodName ?? "",
+                Quantity             = i.Quantity,
+                UnitPrice            = i.Price,
+                Subtotal             = i.Price * i.Quantity,
+                SpecialInstructions  = i.SpecialInstructions,
+            }).ToList() ?? new List<OrderItem>()
+        };
+
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            message = "Order created successfully",
+            orderId = order.OrderId,
+            orderNumber = order.OrderNumber,
+            total = order.Total,
+            status = order.Status
+        });
+    }
+
+    // GET /api/orders
+    [HttpGet]
+    public async Task<IActionResult> GetOrders()
+    {
+        var userId = GetUserIdFromToken();
+        if (userId == null) return Unauthorized();
+
         var orders = await _context.Orders
+            .Include(o => o.OrderItems)
             .Where(o => o.UserId == userId)
             .OrderByDescending(o => o.CreatedAt)
             .Select(o => new
             {
-                o.OrderId,
-                o.TotalAmount,
-                o.Status,
-                o.DeliveryAddress,
-                o.CreatedAt,
-                ItemCount = _context.Orders.Count(oi => oi.OrderId == o.OrderId)
+                orderId       = o.OrderId,
+                orderNumber   = o.OrderNumber,
+                status        = o.Status,
+                totalAmount   = o.Total,
+                paymentMethod = o.PaymentMethod,
+                paymentStatus = o.PaymentStatus,
+                createdAt     = o.CreatedAt,
+                orderItems    = o.OrderItems.Select(i => new
+                {
+                    foodId    = i.FoodId,
+                    foodName  = i.FoodName,
+                    quantity  = i.Quantity,
+                    price     = i.UnitPrice,
+                    subtotal  = i.Subtotal,
+                }).ToList()
             })
             .ToListAsync();
 
         return Ok(orders);
     }
 
-    // GET: api/orders/{orderId}
-    [HttpGet("{orderId}")]
-    public async Task<IActionResult> GetOrderDetails(int orderId)
+    // GET /api/orders/{id}
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetOrderById(Guid id)
     {
-        var order = await _context.Orders.FindAsync(orderId);
-        if (order == null) return NotFound();
+        var userId = GetUserIdFromToken();
+        if (userId == null) return Unauthorized();
 
-        var items = await _context.Orders
-            .Where(oi => oi.OrderId == orderId)
-            .ToListAsync();
-
-        return Ok(new { order, items });
-    }
-
-    // POST: api/orders/place
-    [HttpPost("place")]
-    public async Task<IActionResult> PlaceOrder([FromBody] PlaceOrderRequest request)
-    {
-        // Get user's cart items
-        var cartItems = await _context.CartItems
-            .Where(c => c.UserId == request.UserId)
-            .ToListAsync();
-
-        if (!cartItems.Any())
-            return BadRequest(new { message = "Cart is empty" });
-
-        // Calculate total
-        double totalAmount = 0;
-        var orderItems = new List<Order>();
-
-        foreach (var cartItem in cartItems)
-        {
-            var food = await _context.Foods.FindAsync(cartItem.FoodId);
-            if (food != null)
+        var order = await _context.Orders
+            .Include(o => o.OrderItems)
+            .Where(o => o.OrderId == id && o.UserId == userId)
+            .Select(o => new
             {
-                totalAmount += food.Price * cartItem.Quantity;
-                orderItems.Add(new Order
+                orderId       = o.OrderId,
+                orderNumber   = o.OrderNumber,
+                status        = o.Status,
+                totalAmount   = o.Total,
+                subtotal      = o.Subtotal,
+                deliveryFee   = o.DeliveryFee,
+                tax           = o.Tax,
+                paymentMethod = o.PaymentMethod,
+                createdAt     = o.CreatedAt,
+                items         = o.OrderItems.Select(i => new
                 {
-                    FoodId = food.FoodId,
-                    FoodName = food.Name,
-                    Quantity = cartItem.Quantity,
-                    Price = food.Price
-                });
-            }
-        }
+                    foodId   = i.FoodId,
+                    foodName = i.FoodName,
+                    quantity = i.Quantity,
+                    price    = i.UnitPrice,
+                    subtotal = i.Subtotal,
+                }).ToList()
+            })
+            .FirstOrDefaultAsync();
 
-        // Create order
-        var order = new Order
-        {
-            UserId = request.UserId,
-            TotalAmount = totalAmount,
-            DeliveryAddress = request.DeliveryAddress,
-            Phone = request.Phone,
-            Notes = request.Notes,
-            Status = "pending"
-        };
-
-        _context.Orders.Add(order);
-        await _context.SaveChangesAsync();
-
-        // Add order items
-        foreach (var item in orderItems)
-        {
-            item.OrderId = order.OrderId;
-        }
-        _context.Orders.AddRange(orderItems);
-
-        // Clear cart
-        _context.CartItems.RemoveRange(cartItems);
-        await _context.SaveChangesAsync();
-
-        return Ok(new { message = "Order placed successfully", orderId = order.OrderId });
+        if (order == null) return NotFound(new { message = "Order not found" });
+        return Ok(order);
     }
 
-    // PUT: api/orders/{orderId}/status
-    [HttpPut("{orderId}/status")]
-    public async Task<IActionResult> UpdateOrderStatus(int orderId, [FromBody] UpdateStatusRequest request)
+    private Guid? GetUserIdFromToken()
     {
-        var order = await _context.Orders.FindAsync(orderId);
-        if (order == null) return NotFound();
-
-        order.Status = request.Status;
-        await _context.SaveChangesAsync();
-        return Ok(new { message = "Order status updated" });
-    }
-
-    // DELETE: api/orders/{orderId}
-    [HttpDelete("{orderId}")]
-    public async Task<IActionResult> CancelOrder(int orderId)
-    {
-        var order = await _context.Orders.FindAsync(orderId);
-        if (order == null) return NotFound();
-
-        if (order.Status == "delivering" || order.Status == "completed")
-            return BadRequest(new { message = "Cannot cancel order in this status" });
-
-        order.Status = "cancelled";
-        await _context.SaveChangesAsync();
-        return Ok(new { message = "Order cancelled successfully" });
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier)
+                 ?? User.FindFirst("sub")
+                 ?? User.FindFirst("userId");
+        if (claim == null) return null;
+        return Guid.TryParse(claim.Value, out var guid) ? guid : null;
     }
 }
 
-public class PlaceOrderRequest
+public class CreateOrderRequest
 {
-    public Guid UserId { get; set; }
-    public string? DeliveryAddress { get; set; }
-    public string? Phone { get; set; }
-    public string? Notes { get; set; }
+    [JsonPropertyName("total")]           public double Total { get; set; }
+    [JsonPropertyName("payment_method")]  public string? PaymentMethod { get; set; }
+    [JsonPropertyName("delivery_address")]public string? DeliveryAddress { get; set; }
+    [JsonPropertyName("phone")]           public string? Phone { get; set; }
+    [JsonPropertyName("notes")]           public string? Notes { get; set; }
+    [JsonPropertyName("items")]           public List<OrderItemRequest>? Items { get; set; }
 }
 
-public class UpdateStatusRequest
+public class OrderItemRequest
 {
-    public string Status { get; set; } = string.Empty;
+    [JsonPropertyName("food_id")]              public int FoodId { get; set; }
+    [JsonPropertyName("food_name")]            public string? FoodName { get; set; }
+    [JsonPropertyName("quantity")]             public int Quantity { get; set; }
+    [JsonPropertyName("price")]                public double Price { get; set; }
+    [JsonPropertyName("special_instructions")] public string? SpecialInstructions { get; set; }
 }
