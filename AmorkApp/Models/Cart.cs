@@ -1,24 +1,33 @@
-using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AmorkApp.Models;
 
+[Table("cart_items")]
 public class Cart
 {
     [Key]
-    public int CartItemId { get; set; }
+    [Column("cart_item_id")]
+    public Guid CartItemId { get; set; } = Guid.NewGuid();
+
     [Required]
+    [Column("user_id")]
     public Guid UserId { get; set; }
+
     [Required]
-    public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    [Required]
+    [Column("food_id")]
     public int FoodId { get; set; }
-    [Range(1, 5)]
-    public int Quantity { get; set; }
+
     [Required]
-    public int Rating { get; set; }
-    public string? Comment { get; set; }
+    [Column("quantity")]
+    public int Quantity { get; set; } = 1;
+
+    [Column("special_instructions")]
+    public string? SpecialInstructions { get; set; }
+
+    [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public string? ImageUrl {get; set;}
+
+    [Column("updated_at")]
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

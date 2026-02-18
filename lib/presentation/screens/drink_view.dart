@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:amork/data/models/food_model.dart';
 import 'detail_screen.dart';
-import 'see_all_screen.dart'; // NEW IMPORT
-
+import 'see_all_screen.dart';
 class DrinkView extends StatelessWidget {
   final Function(FoodModel) onAddToCart;
 

@@ -1,29 +1,43 @@
-import 'cart_model.dart';
-
 class OrderModel {
-  final String orderId;
-  final List<CartItemModel> items;
+  final int id;
   final double totalAmount;
-  final String paymentMethod; // "Cash" or "QR"
-  final DateTime orderDate;
+  final String status;
+  final DateTime createdAt;
+  final List<OrderItemModel> items;
 
   OrderModel({
-    required this.orderId,
-    required this.items,
+    required this.id,
     required this.totalAmount,
-    required this.paymentMethod,
-    required this.orderDate,
+    required this.status,
+    required this.createdAt,
+    required this.items,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
-    return OrderModel(
-      orderId: json['orderId'],
-      items: (json['items'] as List)
-          .map((item) => CartItemModel.fromJson(item))
-          .toList(),
-      totalAmount: json['totalAmount'].toDouble(),
-      paymentMethod: json['paymentMethod'],
-      orderDate: DateTime.parse(json['orderDate']),
-    );
-  }
+  return OrderModel(
+    id: json['orderId'] ?? json['order_id'] ?? 0,
+    totalAmount: (json['totalAmount'] ?? json['total'] ?? 0.0).toDouble(),
+    status: json['status'] ?? 'pending',
+    createdAt: DateTime.tryParse(json['createdAt'] ?? json['created_at'] ?? '') ?? DateTime.now(),
+    items: (json['orderItems'] ?? json['items'] ?? [])
+        .map<OrderItemModel>((i) => OrderItemModel.fromJson(i))
+        .toList(),
+  );
+}
+}
+
+class OrderItemModel {
+  final String foodName;
+  final int quantity;
+  final double price;
+
+  OrderItemModel({required this.foodName, required this.quantity, required this.price});
+
+  factory OrderItemModel.fromJson(Map<String, dynamic> json) {
+  return OrderItemModel(
+    foodName: json['foodName'] ?? json['food_name'] ?? '',
+    quantity: json['quantity'] ?? 0,
+    price: (json['price'] ?? 0.0).toDouble(),
+  );
+}
 }

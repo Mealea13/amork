@@ -1,112 +1,60 @@
 import 'package:flutter/material.dart';
 
-class NotificationScreen extends StatelessWidget {
+class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
+
+  @override
+  State<NotificationScreen> createState() => _NotificationScreenState();
+}
+
+class _NotificationScreenState extends State<NotificationScreen> {
+  // Example data that mimics a real API response
+  final List<Map<String, dynamic>> _notifications = [
+    {"id": 1, "title": "Order Delivered!", "body": "Your order #102 has arrived.", "time": "Just now", "isRead": false, "type": "delivery"},
+    {"id": 2, "title": "Promo!", "body": "Get 20% off with code AMORK20.", "time": "2h ago", "isRead": false, "type": "promo"},
+    {"id": 3, "title": "Review", "body": "How was your Fish Amork?", "time": "Yesterday", "isRead": true, "type": "star"},
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF9F6F0),
       appBar: AppBar(
+        title: const Text("Notifications", style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text("Notifications", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         centerTitle: true,
-      ),
-      body: ListView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(20),
-        children: [
-          _buildNotificationCard(
-            icon: Icons.local_shipping,
-            color: Colors.green,
-            title: "Order Delivered!",
-            message: "Your order #AMK-0988 has been successfully delivered. Enjoy your meal!",
-            time: "10 mins ago",
-            isNew: true,
-          ),
-          _buildNotificationCard(
-            icon: Icons.local_offer,
-            color: Colors.red,
-            title: "Happy Khmer New Year! 🎊",
-            message: "Enjoy 50% OFF on all traditional foods today. Don't miss out!",
-            time: "2 hours ago",
-            isNew: true,
-          ),
-          _buildNotificationCard(
-            icon: Icons.star,
-            color: Colors.orange,
-            title: "Rate your last meal",
-            message: "How was your Special Beef Burger? Leave a review and earn points.",
-            time: "1 day ago",
-            isNew: false,
-          ),
-          _buildNotificationCard(
-            icon: Icons.account_balance_wallet,
-            color: Colors.blue,
-            title: "Payment Successful",
-            message: "We have received your payment of \$10.50 via ABA Pay.",
-            time: "2 days ago",
-            isNew: false,
-          ),
+        actions: [
+          TextButton(onPressed: () => setState(() {
+            for (var n in _notifications) { n['isRead'] = true; }
+          }), child: const Text("Clear all", style: TextStyle(color: Colors.orange)))
         ],
+      ),
+      body: ListView.builder(
+        itemCount: _notifications.length,
+        itemBuilder: (context, index) {
+          final n = _notifications[index];
+          return Container(
+            color: n['isRead'] ? Colors.transparent : Colors.orange.withOpacity(0.05),
+            child: ListTile(
+              leading: _getIcon(n['type']),
+              title: Text(n['title'], style: TextStyle(fontWeight: n['isRead'] ? FontWeight.normal : FontWeight.bold)),
+              subtitle: Text(n['body']),
+              trailing: Text(n['time'], style: const TextStyle(fontSize: 10)),
+              onTap: () => setState(() => n['isRead'] = true),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildNotificationCard({
-    required IconData icon,
-    required Color color,
-    required String title,
-    required String message,
-    required String time,
-    required bool isNew,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isNew ? Colors.white : const Color(0xFFF1E6D3).withOpacity(0.5), // Slightly darker if read
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: isNew ? [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 5))] : [],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                    if (isNew)
-                      Container(
-                        width: 8, height: 8,
-                        decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                      )
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Text(message, style: TextStyle(color: Colors.grey.shade700, fontSize: 13, height: 1.4)),
-                const SizedBox(height: 8),
-                Text(time, style: const TextStyle(color: Colors.grey, fontSize: 11, fontWeight: FontWeight.w500)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+  Widget _getIcon(String type) {
+    IconData icon;
+    Color color;
+    if (type == "delivery") { icon = Icons.local_shipping; color = Colors.green; }
+    else if (type == "promo") { icon = Icons.card_giftcard; color = Colors.red; }
+    else { icon = Icons.star; color = Colors.orange; }
+    return CircleAvatar(backgroundColor: color.withOpacity(0.1), child: Icon(icon, color: color, size: 20));
   }
 }

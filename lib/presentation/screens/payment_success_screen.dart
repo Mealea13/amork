@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'main_screen.dart';
 
 class PaymentSuccessScreen extends StatelessWidget {
   const PaymentSuccessScreen({super.key});
@@ -18,19 +19,26 @@ class PaymentSuccessScreen extends StatelessWidget {
               child: const Icon(Icons.check, size: 120, color: Colors.green),
             ),
             const SizedBox(height: 30),
-            const Text("Your Order is Successful!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const Text("Order Placed Successfully! 🎉",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            const Text("Thank You so much for Order."),
+            const Text("Thank you for your order!", style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 40),
-            GestureDetector(
-              onTap: () {
-                // NEW: Popping 'true' tells the entire app the checkout is done!
-                Navigator.pop(context, true);
-              },
-              child: const Text(
-                "Back to Menu",
-                style: TextStyle(decoration: TextDecoration.underline, fontSize: 16, fontWeight: FontWeight.w500),
+            // ✅ Goes to MainScreen and clears all routes (no login page)
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
               ),
+              onPressed: () {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const MainScreen()),
+                  (route) => false,
+                );
+              },
+              child: const Text("Back to Home",
+                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
