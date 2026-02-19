@@ -31,13 +31,12 @@ namespace AmorkApp.Controllers
             var orderCount = await _context.Orders
                 .Where(o => o.UserId == userId)
                 .CountAsync();
-
             var memberType = orderCount switch
             {
-                0             => "New Guest",
-                >= 1 and <= 4 => "Regular",
-                >= 5 and <= 9 => "Member",
-                _             => "VIP"
+                0             => "regular",   // 0 orders
+                >= 1 and <= 4 => "regular",   // 1-4 orders
+                >= 5 and <= 9 => "premium",   // 5-9 orders
+                _             => "vip"        // 10+ orders
             };
 
             if (user.MemberType != memberType)
@@ -67,7 +66,6 @@ namespace AmorkApp.Controllers
             var user = await _context.Users.FindAsync(userId);
             if (user == null) return NotFound(new { message = "User not found" });
 
-            // ✅ Only update if value is provided and not empty
             if (!string.IsNullOrWhiteSpace(request.Fullname))
                 user.Fullname = request.Fullname.Trim();
 
@@ -119,7 +117,6 @@ namespace AmorkApp.Controllers
         }
     }
 
-    // ✅ [JsonPropertyName] maps lowercase JSON keys → C# properties
     public class ProfileUpdateDto
     {
         [JsonPropertyName("fullname")]

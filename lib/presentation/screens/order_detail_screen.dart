@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:amork/core/app_config.dart';
+import 'package:amork/presentation/screens/skeleton_widget.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final String orderId;
@@ -152,10 +153,32 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Scaffold(
-        backgroundColor: Color(0xFFF9F6F0),
-        body: Center(child: CircularProgressIndicator(color: Colors.orange)),
+        if (isLoading) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF9F6F0),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent, elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          physics: const NeverScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              SkeletonWidget(width: double.infinity, height: 120, borderRadius: BorderRadius.circular(20)),
+              const SizedBox(height: 15),
+              SkeletonWidget(width: double.infinity, height: 80,  borderRadius: BorderRadius.circular(20)),
+              const SizedBox(height: 15),
+              SkeletonWidget(width: double.infinity, height: 200, borderRadius: BorderRadius.circular(20)),
+              const SizedBox(height: 15),
+              const OrderItemSkeleton(),
+              const OrderItemSkeleton(),
+            ],
+          ),
+        ),
       );
     }
 

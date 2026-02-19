@@ -16,60 +16,58 @@ public class FoodsController : ControllerBase
         _context = context;
     }
 
-    // GET /api/foods?page=1&limit=20&category=food&search=
+    // GET /api/foods?page=1&limit=20&categoryId=1&search=burger
     [HttpGet]
     public async Task<IActionResult> GetFoods(
         [FromQuery] int? categoryId,
-        [FromQuery] string? category,   // supports ?category=food (name-based)
+        [FromQuery] string? category,
         [FromQuery] string? search,
         [FromQuery] int page = 1,
         [FromQuery] int limit = 20)
     {
         var query = _context.Foods.AsQueryable();
 
-        // Filter by categoryId number (e.g. ?categoryId=1)
         if (categoryId.HasValue)
-        {
             query = query.Where(f => f.CategoryId == categoryId.Value);
-        }
 
-        // Filter by category name (e.g. ?category=food)
         if (!string.IsNullOrEmpty(category))
         {
             var cat = await _context.Categories
                 .FirstOrDefaultAsync(c => c.Name.ToLower() == category.ToLower());
-
             if (cat != null)
-            {
                 query = query.Where(f => f.CategoryId == cat.Id);
-            }
         }
 
-        // Filter by search keyword
         if (!string.IsNullOrEmpty(search))
-        {
             query = query.Where(f =>
-                f.Name.Contains(search) ||
-                (f.Description != null && f.Description.Contains(search)));
-        }
+                f.Name.ToLower().Contains(search.ToLower()) ||
+                (f.Description != null && f.Description.ToLower().Contains(search.ToLower())));
 
-        // Only show available foods
         query = query.Where(f => f.IsAvailable);
 
-        // Pagination
         var totalItems = await query.CountAsync();
         var foods = await query
             .Skip((page - 1) * limit)
             .Take(limit)
             .ToListAsync();
 
-        return Ok(new
-        {
-            total = totalItems,
-            page,
-            limit,
-            data = foods
-        });
+        return Ok(new { total = totalItems, page, limit, data = foods });
+    }
+
+    // GET /api/foods/search?q=burger
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string? q)
+    {
+        if (string.IsNullOrWhiteSpace(q))
+            return Ok(new List<object>());
+
+        var results = await _context.Foods
+            .Where(f => f.IsAvailable &&
+                (f.Name.ToLower().Contains(q.ToLower()) ||
+                 (f.Description != null && f.Description.ToLower().Contains(q.ToLower()))))
+            .ToListAsync();
+
+        return Ok(results);
     }
 
     // GET /api/foods/popular
@@ -86,25 +84,13 @@ public class FoodsController : ControllerBase
         return Ok(foods);
     }
 
-    // GET /api/foods/5
+    // GET /api/foods/{id}
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
         var food = await _context.Foods.FindAsync(id);
         if (food == null) return NotFound(new { message = "Food item not found" });
         return Ok(food);
-    }
-
-    // POST /api/foods/add-to-cart
-    [HttpPost("add-to-cart")]
-    public async Task<IActionResult> AddToCart([FromBody] Cart item)
-    {
-        var foodExists = await _context.Foods.AnyAsync(f => f.FoodId == item.FoodId);
-        if (!foodExists) return BadRequest(new { message = "This food no longer exists." });
-
-        _context.CartItems.Add(item);
-        await _context.SaveChangesAsync();
-        return Ok(new { message = "Added to cart successfully!" });
     }
 
     // POST /api/foods
@@ -117,7 +103,7 @@ public class FoodsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = food.FoodId }, food);
     }
 
-    // PUT /api/foods/5
+    // PUT /api/foods/{id}
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] Food foodData)
     {
@@ -139,7 +125,7 @@ public class FoodsController : ControllerBase
         return Ok(new { message = "Food updated successfully!" });
     }
 
-    // DELETE /api/foods/5
+    // DELETE /api/foods/{id}
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

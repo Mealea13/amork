@@ -33,31 +33,31 @@ public class AuthController : ControllerBase
         // 2. Create new user
         var user = new User
         {
-            UserId = Guid.NewGuid(),
-            Fullname = request.Fullname,
-            Email = request.Email,
-            PasswordHash = request.Password, // Store plain for now
-            Phone = request.Phone,
-            MemberType = request.MemberType ?? "regular",
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            IsActive = true,
+            UserId       = Guid.NewGuid(),
+            Fullname     = request.Fullname,
+            Email        = request.Email,
+            PasswordHash = request.Password, // TODO: hash with BCrypt later
+            Phone        = request.Phone,
+            MemberType   = "regular",
+            CreatedAt    = DateTime.UtcNow,
+            UpdatedAt    = DateTime.UtcNow,
+            IsActive     = true,
         };
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        // 3. Generate real JWT token
+        // 3. Generate JWT token
         var token = GenerateJwtToken(user);
 
         return Ok(new {
             message = "User registered successfully!",
-            token = token,
-            user = new {
-                id = user.UserId,
-                userId = user.UserId,
+            token   = token,
+            user    = new {
+                id       = user.UserId,
+                userId   = user.UserId,
                 fullname = user.Fullname,
-                email = user.Email,
+                email    = user.Email,
             }
         });
     }
@@ -75,22 +75,22 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Invalid email or password" });
         }
 
-        // 3. Generate real JWT token ✅
+        // 3. Generate JWT token
         var token = GenerateJwtToken(user);
 
         return Ok(new {
             message = "Login successful",
-            token = token, // ✅ Real JWT now!
-            user = new {
-                id = user.UserId,
-                userId = user.UserId,
+            token   = token,
+            user    = new {
+                id       = user.UserId,
+                userId   = user.UserId,
                 fullname = user.Fullname,
-                email = user.Email,
+                email    = user.Email,
             }
         });
     }
 
-    // ✅ Real JWT generator
+    // JWT generator
     private string GenerateJwtToken(User user)
     {
         var key = new SymmetricSecurityKey(
@@ -105,10 +105,10 @@ public class AuthController : ControllerBase
         };
 
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.UtcNow.AddDays(7),
+            issuer:             _configuration["Jwt:Issuer"],
+            audience:           _configuration["Jwt:Audience"],
+            claims:             claims,
+            expires:            DateTime.UtcNow.AddDays(7),
             signingCredentials: credentials
         );
 
@@ -131,7 +131,7 @@ public class RegisterRequest
     public string? Phone { get; set; }
 
     [JsonPropertyName("member_type")]
-    public string? MemberType { get; set; }
+    public string? MemberType { get; set; } // kept for compatibility but ignored
 }
 
 public class LoginRequest

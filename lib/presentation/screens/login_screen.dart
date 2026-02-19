@@ -89,19 +89,13 @@ class _LoginScreenState extends State<LoginScreen> {
       _emailController.text.trim(),
       _passwordController.text,
     );
-
-    // ✅ DEBUG - see what login returns
     debugPrint('=== LOGIN RESPONSE ===');
     debugPrint(response.toString());
 
     final prefs = await SharedPreferences.getInstance();
-
-    // ✅ Save token
     final token = response['token'] ?? response['access_token'] ?? '';
     debugPrint('Saving token: $token');
     await prefs.setString('auth_token', token.toString());
-
-    // ✅ Save user id
     final user = response['user'] ?? response['User'] ?? {};
     final userId = user['id'] ?? user['userId'] ?? user['user_id'] ?? '';
     debugPrint('Saving userId: $userId');

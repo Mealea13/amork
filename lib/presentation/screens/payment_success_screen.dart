@@ -24,7 +24,6 @@ class PaymentSuccessScreen extends StatelessWidget {
             const SizedBox(height: 10),
             const Text("Thank you for your order!", style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 40),
-            // ✅ Goes to MainScreen and clears all routes (no login page)
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,

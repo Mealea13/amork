@@ -4,8 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace AmorkApp.Models;
-
-// This maps the class to the "categories" table in Postgres (lowercase)
 [Table("categories")]
 public class Category
 {

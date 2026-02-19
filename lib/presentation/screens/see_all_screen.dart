@@ -36,7 +36,7 @@ class SeeAllScreen extends StatelessWidget {
             return GestureDetector(
               onTap: () async {
                 final addedFood = await Navigator.push(context, MaterialPageRoute(builder: (_) => DetailScreen(food: food)));
-                if (addedFood != null) Navigator.pop(context, addedFood); 
+                if (addedFood != null) Navigator.pop(context, addedFood);
               },
               child: Container(
                 padding: const EdgeInsets.all(12),
@@ -46,8 +46,6 @@ class SeeAllScreen extends StatelessWidget {
                   children: [
                     Text(food.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 4),
-                    
-                    // DISCOUNT PRICE LOGIC
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

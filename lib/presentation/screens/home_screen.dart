@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     // --- 5. POPULAR FOODS LIST ---
                     SizedBox(
-                      height: 270, 
+                      height: 270,
                       child: homeProvider.popularFoods.isEmpty
                           ? const Center(child: Text("No foods found."))
                           : ListView.builder(

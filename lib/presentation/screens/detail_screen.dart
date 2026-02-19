@@ -22,28 +22,10 @@ class _DetailScreenState extends State<DetailScreen> {
   bool _isFavorite = false;
   bool _isTogglingFavorite = false;
 
-  // ── Additional ingredients ──
-  List<dynamic> additionalIngredients = [];
-  Set<int> selectedIngredientIndexes = {};
-  bool isLoadingIngredients = true;
-
-  final List<Map<String, dynamic>> _staticAddOns = [
-    {'id': -1, 'name': 'Extra Cheese', 'price': 0.50},
-    {'id': -2, 'name': 'Extra Sauce',  'price': 0.30},
-    {'id': -3, 'name': 'Extra Spicy',  'price': 0.25},
-    {'id': -4, 'name': 'Extra Meat',   'price': 1.00},
-    {'id': -5, 'name': 'No Onion',     'price': 0.00},
-    {'id': -6, 'name': 'Extra Rice',   'price': 0.50},
-  ];
-
-  List<dynamic> get _activeAddOns =>
-      additionalIngredients.isNotEmpty ? additionalIngredients : _staticAddOns;
-
   @override
   void initState() {
     super.initState();
-    _fetchFoodDetail();
-    _checkFavorite(); // ✅ check if already favorited
+    _checkFavorite();
   }
 
   Future<String?> _getToken() async {
@@ -51,29 +33,6 @@ class _DetailScreenState extends State<DetailScreen> {
     return prefs.getString('auth_token');
   }
 
-  Future<void> _fetchFoodDetail() async {
-    try {
-      final token = await _getToken();
-      final response = await http.get(
-        Uri.parse('${AppConfig.foodsEndpoint}/${widget.food.id}'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          additionalIngredients = data['additional_ingredients'] ?? [];
-          isLoadingIngredients = false;
-        });
-      } else {
-        setState(() => isLoadingIngredients = false);
-      }
-    } catch (e) {
-      debugPrint('Error fetching food detail: $e');
-      setState(() => isLoadingIngredients = false);
-    }
-  }
-
-  // ── Check if food is already in favorites ──
   Future<void> _checkFavorite() async {
     try {
       final token = await _getToken();
@@ -90,7 +49,6 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
-  // ── Toggle favorite on/off ──
   Future<void> _toggleFavorite() async {
     setState(() => _isTogglingFavorite = true);
     try {
@@ -125,18 +83,11 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
-  double get _addOnTotal {
-    return selectedIngredientIndexes.fold(0.0, (sum, index) {
-      if (index < 0 || index >= _activeAddOns.length) return sum;
-      return sum + (_activeAddOns[index]['price'] ?? 0.0).toDouble();
-    });
-  }
-
-  double get totalPrice => (widget.food.price + _addOnTotal) * quantity;
+  double get totalPrice => widget.food.price * quantity;
 
   double? get totalOriginalPrice {
     if (widget.food.originalPrice == null) return null;
-    return (widget.food.originalPrice! + _addOnTotal) * quantity;
+    return widget.food.originalPrice! * quantity;
   }
 
   Future<void> _addToCart() async {
@@ -154,12 +105,11 @@ class _DetailScreenState extends State<DetailScreen> {
         body: jsonEncode({
           'food_id': widget.food.id,
           'quantity': quantity,
-          'name': widget.food.name,
         }),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        if (mounted) Navigator.pop(context, true);
+        if (mounted) Navigator.pop(context, quantity);
       } else {
         throw Exception("Failed: ${response.statusCode}");
       }
@@ -181,7 +131,7 @@ class _DetailScreenState extends State<DetailScreen> {
       backgroundColor: const Color(0xFFFFF8E7),
       body: Column(
         children: [
-          // ── Top bar with back + heart ──
+          // ── Top bar ──
           SafeArea(
             bottom: false,
             child: Padding(
@@ -189,20 +139,14 @@ class _DetailScreenState extends State<DetailScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Back button
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: const Icon(Icons.arrow_back, color: Colors.black, size: 28),
                   ),
-                  // Heart / Favorite button
                   _isTogglingFavorite
                       ? const SizedBox(
-                          width: 28,
-                          height: 28,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.red,
-                          ),
+                          width: 28, height: 28,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.red),
                         )
                       : GestureDetector(
                           onTap: _toggleFavorite,
@@ -221,6 +165,7 @@ class _DetailScreenState extends State<DetailScreen> {
             ),
           ),
 
+          // ── Food Image ──
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Image.asset(
@@ -257,8 +202,7 @@ class _DetailScreenState extends State<DetailScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFFFF3D6),
                                   borderRadius: BorderRadius.circular(20),
@@ -266,10 +210,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                 child: const Row(children: [
                                   Icon(Icons.star, color: Colors.orange, size: 18),
                                   SizedBox(width: 5),
-                                  Text("4.8",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16)),
+                                  Text("4.8", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                                 ]),
                               ),
                               Column(
@@ -280,18 +221,14 @@ class _DetailScreenState extends State<DetailScreen> {
                                       "\$${totalOriginalPrice!.toStringAsFixed(2)}",
                                       style: const TextStyle(
                                         decoration: TextDecoration.lineThrough,
-                                        color: Colors.grey,
-                                        fontSize: 14,
+                                        color: Colors.grey, fontSize: 14,
                                       ),
                                     ),
                                   Text(
                                     "\$${totalPrice.toStringAsFixed(2)}",
                                     style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: totalOriginalPrice != null
-                                          ? Colors.red
-                                          : Colors.orange,
+                                      fontSize: 24, fontWeight: FontWeight.bold,
+                                      color: totalOriginalPrice != null ? Colors.red : Colors.orange,
                                     ),
                                   ),
                                 ],
@@ -307,32 +244,25 @@ class _DetailScreenState extends State<DetailScreen> {
                               Expanded(
                                 child: Text(
                                   widget.food.name,
-                                  style: const TextStyle(
-                                      fontSize: 22, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                                 ),
                               ),
                               Row(
                                 children: [
                                   GestureDetector(
                                     onTap: () {
-                                      if (quantity > 1)
-                                        setState(() => quantity--);
+                                      if (quantity > 1) setState(() => quantity--);
                                     },
-                                    child: const Icon(Icons.remove_circle,
-                                        color: Colors.orange, size: 30),
+                                    child: const Icon(Icons.remove_circle, color: Colors.orange, size: 30),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 12),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
                                     child: Text('$quantity',
-                                        style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold)),
+                                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                                   ),
                                   GestureDetector(
                                     onTap: () => setState(() => quantity++),
-                                    child: const Icon(Icons.add_circle,
-                                        color: Colors.orange, size: 30),
+                                    child: const Icon(Icons.add_circle, color: Colors.orange, size: 30),
                                   ),
                                 ],
                               ),
@@ -343,19 +273,15 @@ class _DetailScreenState extends State<DetailScreen> {
                           // ── Calories & Time ──
                           Row(
                             children: [
-                              const Icon(Icons.local_fire_department,
-                                  color: Colors.orange, size: 16),
+                              const Icon(Icons.local_fire_department, color: Colors.orange, size: 16),
                               const SizedBox(width: 4),
                               Text("${widget.food.calories} Cal",
-                                  style: const TextStyle(
-                                      color: Colors.grey, fontSize: 13)),
+                                  style: const TextStyle(color: Colors.grey, fontSize: 13)),
                               const SizedBox(width: 16),
-                              const Icon(Icons.access_time_filled,
-                                  color: Colors.orangeAccent, size: 16),
+                              const Icon(Icons.access_time_filled, color: Colors.orangeAccent, size: 16),
                               const SizedBox(width: 4),
                               Text(widget.food.time,
-                                  style: const TextStyle(
-                                      color: Colors.grey, fontSize: 13)),
+                                  style: const TextStyle(color: Colors.grey, fontSize: 13)),
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -363,130 +289,8 @@ class _DetailScreenState extends State<DetailScreen> {
                           // ── Description ──
                           Text(
                             widget.food.description,
-                            style: const TextStyle(
-                                color: Colors.grey, fontSize: 14, height: 1.5),
+                            style: const TextStyle(color: Colors.grey, fontSize: 14, height: 1.5),
                           ),
-                          const SizedBox(height: 24),
-
-                          // ── Add-ons Section ──
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text("Add-ons",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold)),
-                              if (selectedIngredientIndexes.isNotEmpty)
-                                Text(
-                                  "${selectedIngredientIndexes.length} selected",
-                                  style: const TextStyle(
-                                      color: Colors.orange,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-
-                          if (isLoadingIngredients)
-                            const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(12),
-                                child: CircularProgressIndicator(
-                                    color: Colors.orange, strokeWidth: 2),
-                              ),
-                            )
-                          else
-                            Wrap(
-                              spacing: 10,
-                              runSpacing: 10,
-                              children: List.generate(_activeAddOns.length, (index) {
-                                final ingredient = _activeAddOns[index];
-                                final bool isSelected =
-                                    selectedIngredientIndexes.contains(index);
-                                final double addOnPrice =
-                                    (ingredient['price'] ?? 0.0).toDouble();
-
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      if (isSelected) {
-                                        selectedIngredientIndexes.remove(index);
-                                      } else {
-                                        selectedIngredientIndexes.add(index);
-                                      }
-                                    });
-                                  },
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 14, vertical: 10),
-                                    decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? Colors.orange
-                                          : const Color(0xFFF9F6F0),
-                                      borderRadius: BorderRadius.circular(15),
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? Colors.orange
-                                            : Colors.transparent,
-                                        width: 2,
-                                      ),
-                                      boxShadow: isSelected
-                                          ? [
-                                              BoxShadow(
-                                                  color: Colors.orange
-                                                      .withOpacity(0.3),
-                                                  blurRadius: 8,
-                                                  offset: const Offset(0, 3))
-                                            ]
-                                          : [],
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        if (isSelected)
-                                          const Padding(
-                                            padding:
-                                                EdgeInsets.only(right: 6),
-                                            child: Icon(Icons.check_circle,
-                                                color: Colors.white, size: 16),
-                                          ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              ingredient['name'] ?? '',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 13,
-                                                color: isSelected
-                                                    ? Colors.white
-                                                    : Colors.black,
-                                              ),
-                                            ),
-                                            Text(
-                                              addOnPrice == 0.0
-                                                  ? "Free"
-                                                  : "+\$${addOnPrice.toStringAsFixed(2)}",
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                color: isSelected
-                                                    ? Colors.white70
-                                                    : Colors.orange,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }),
-                            ),
-
                           const SizedBox(height: 20),
                         ],
                       ),
@@ -499,34 +303,23 @@ class _DetailScreenState extends State<DetailScreen> {
                       backgroundColor: const Color(0xFFFFF3D6),
                       minimumSize: const Size(double.infinity, 55),
                       elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                     ),
                     onPressed: isAddingToCart ? null : _addToCart,
                     child: isAddingToCart
                         ? const SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.orange),
+                            height: 22, width: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.orange),
                           )
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.shopping_cart_outlined,
-                                  color: Colors.black, size: 20),
+                              const Icon(Icons.shopping_cart_outlined, color: Colors.black, size: 20),
                               const SizedBox(width: 8),
-                              Flexible(
-                                child: Text(
-                                  selectedIngredientIndexes.isEmpty
-                                      ? "Add to Cart  •  \$${totalPrice.toStringAsFixed(2)}"
-                                      : "Add to Cart  •  \$${totalPrice.toStringAsFixed(2)} (${selectedIngredientIndexes.length} add-on${selectedIngredientIndexes.length > 1 ? 's' : ''})",
-                                  style: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                              Text(
+                                "Add to Cart  •  \$${totalPrice.toStringAsFixed(2)}",
+                                style: const TextStyle(
+                                    color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),

@@ -7,7 +7,6 @@ import '../models/food_model.dart';
 import '../models/user_model.dart';
 
 class ApiService {
-  // ── Helper: get auth headers from saved token ──
   Future<Map<String, String>> _getHeaders() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token') ?? '';
@@ -16,11 +15,6 @@ class ApiService {
       'Authorization': 'Bearer $token',
     };
   }
-
-  // ────────────────────────────────────────────
-  // AUTH
-  // ────────────────────────────────────────────
-
   Future<Map<String, dynamic>> register(UserModel user, String password) async {
     final response = await http.post(
       Uri.parse('${AppConfig.authEndpoint}/register'),
@@ -30,7 +24,7 @@ class ApiService {
         'email': user.email,
         'password': password,
         'phone': user.phone,
-        'member_type': 'regular',
+        'member_type': 'new guest',
       }),
     );
 
@@ -79,11 +73,6 @@ class ApiService {
     await prefs.remove('auth_token');
     await prefs.remove('user_id');
   }
-
-  // ────────────────────────────────────────────
-  // PROFILE
-  // ────────────────────────────────────────────
-
   Future<UserModel> getUserProfile() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('user_id');
@@ -100,11 +89,6 @@ class ApiService {
       throw Exception('Failed to load profile');
     }
   }
-
-  // ────────────────────────────────────────────
-  // CATEGORIES
-  // ────────────────────────────────────────────
-
   Future<List<CategoryModel>> getCategories() async {
     final headers = await _getHeaders();
     final response = await http.get(
@@ -119,11 +103,6 @@ class ApiService {
       throw Exception('Failed to load categories');
     }
   }
-
-  // ────────────────────────────────────────────
-  // FOODS
-  // ────────────────────────────────────────────
-
   Future<List<FoodModel>> getPopularFoods() async {
     final headers = await _getHeaders();
     final response = await http.get(
@@ -138,11 +117,6 @@ class ApiService {
       throw Exception('Failed to load popular foods');
     }
   }
-
-  // ────────────────────────────────────────────
-  // CART
-  // ────────────────────────────────────────────
-
   Future<Map<String, dynamic>> getCart() async {
     final headers = await _getHeaders();
     final response = await http.get(
@@ -210,11 +184,6 @@ class ApiService {
       throw Exception('Failed to clear cart');
     }
   }
-
-  // ────────────────────────────────────────────
-  // ORDERS
-  // ────────────────────────────────────────────
-
   Future<List<dynamic>> getOrders({String status = 'all'}) async {
     final headers = await _getHeaders();
     final response = await http.get(
