@@ -8,26 +8,23 @@ public class Cart
 {
     [Key]
     [Column("cart_item_id")]
-    public Guid CartItemId { get; set; } = Guid.NewGuid();
+    public Guid CartItemId { get; set; }
 
-    [Required]
     [Column("user_id")]
     public Guid UserId { get; set; }
 
-    [Required]
     [Column("food_id")]
     public int FoodId { get; set; }
 
-    [Required]
     [Column("quantity")]
-    public int Quantity { get; set; } = 1;
+    public int Quantity { get; set; }
 
     [Column("special_instructions")]
     public string? SpecialInstructions { get; set; }
 
     [Column("created_at")]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
 
     [Column("updated_at")]
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; }
 }

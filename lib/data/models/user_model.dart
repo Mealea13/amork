@@ -1,4 +1,3 @@
-//user_model.dart
 class UserModel {
   final String id;
   final String name;
@@ -15,6 +14,7 @@ class UserModel {
     this.membershipStatus = 'Member',
     this.profileImage,
   });
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -28,12 +28,12 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      phone: json['phone'],
-      membershipStatus: json['membershipStatus'] ?? 'Member',
-      profileImage: json['profileImage'],
+      id: json['userId'] ?? json['id'] ?? '',
+      name: json['fullname'] ?? json['name'] ?? '',
+      email: json['email'] ?? '',
+      phone: json['phone'] ?? '',
+      membershipStatus: json['member'] ?? json['membershipStatus'] ?? 'Member',
+      profileImage: json['profile_image'] ?? json['profileImage'],
     );
   }
 }

@@ -4,9 +4,12 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_config.dart';
 import 'package:intl/intl.dart';
+import 'package:amork/presentation/screens/skeleton_widget.dart';
 
 class OrderScreen extends StatefulWidget {
-  const OrderScreen({super.key});
+  final Function(int)? onOrderCountChanged;
+
+  const OrderScreen({super.key, this.onOrderCountChanged});
 
   @override
   State<OrderScreen> createState() => _OrderScreenState();
@@ -37,10 +40,13 @@ class _OrderScreenState extends State<OrderScreen> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        final orders = data is List ? data : [];
         setState(() {
-          _orders = data is List ? data : [];
+          _orders = orders;
           _isLoading = false;
         });
+        // ✅ Notify parent to update badge
+        widget.onOrderCountChanged?.call(orders.length);
       } else {
         setState(() => _isLoading = false);
       }
@@ -52,23 +58,23 @@ class _OrderScreenState extends State<OrderScreen> {
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'pending':    return Colors.blue;
-      case 'confirmed':  return Colors.orange;
-      case 'preparing':  return Colors.purple;
-      case 'delivered':  return Colors.green;
-      case 'cancelled':  return Colors.red;
-      default:           return Colors.grey;
+      case 'pending':   return Colors.blue;
+      case 'confirmed': return Colors.orange;
+      case 'preparing': return Colors.purple;
+      case 'delivered': return Colors.green;
+      case 'cancelled': return Colors.red;
+      default:          return Colors.grey;
     }
   }
 
   IconData _getStatusIcon(String status) {
     switch (status.toLowerCase()) {
-      case 'pending':    return Icons.receipt_outlined;
-      case 'confirmed':  return Icons.check_circle_outline;
-      case 'preparing':  return Icons.restaurant_outlined;
-      case 'delivered':  return Icons.home_outlined;
-      case 'cancelled':  return Icons.cancel_outlined;
-      default:           return Icons.info_outline;
+      case 'pending':   return Icons.receipt_outlined;
+      case 'confirmed': return Icons.check_circle_outline;
+      case 'preparing': return Icons.restaurant_outlined;
+      case 'delivered': return Icons.home_outlined;
+      case 'cancelled': return Icons.cancel_outlined;
+      default:          return Icons.info_outline;
     }
   }
 
@@ -77,7 +83,31 @@ class _OrderScreenState extends State<OrderScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF9F6F0),
       appBar: AppBar(
-        title: const Text("My Orders", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("My Orders",
+                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            if (_orders.isNotEmpty) ...[
+              const SizedBox(width: 8),
+              // ✅ Count badge in app bar title
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.orange,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${_orders.length}',
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+            ]
+          ],
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -89,22 +119,34 @@ class _OrderScreenState extends State<OrderScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.orange))
+      ? ListView.builder(
+          padding: const EdgeInsets.all(20),
+          itemCount: 4,
+          itemBuilder: (_, __) => const OrderItemSkeleton(),
+        )
           : _orders.isEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.receipt_long_outlined, size: 80, color: Colors.grey),
+                      const Icon(Icons.receipt_long_outlined,
+                          size: 80, color: Colors.grey),
                       const SizedBox(height: 16),
-                      const Text("No orders yet", style: TextStyle(fontSize: 18, color: Colors.grey)),
+                      const Text("No orders yet",
+                          style: TextStyle(fontSize: 18, color: Colors.grey)),
                       const SizedBox(height: 8),
-                      const Text("Your orders will appear here", style: TextStyle(color: Colors.grey)),
+                      const Text("Your orders will appear here",
+                          style: TextStyle(color: Colors.grey)),
                       const SizedBox(height: 20),
                       ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15)),
+                        ),
                         onPressed: () => Navigator.pop(context),
-                        child: const Text("Order Now", style: TextStyle(color: Colors.white)),
+                        child: const Text("Order Now",
+                            style: TextStyle(color: Colors.white)),
                       )
                     ],
                   ),
@@ -117,10 +159,16 @@ class _OrderScreenState extends State<OrderScreen> {
                     itemBuilder: (context, index) {
                       final order = _orders[index];
                       final status = order['status'] ?? 'pending';
-                      final orderNumber = order['orderNumber'] ?? '#${order['orderId']?.toString().substring(0, 8) ?? index}';
-                      final total = (order['totalAmount'] ?? order['total'] ?? 0.0).toDouble();
-                      final createdAt = DateTime.tryParse(order['createdAt'] ?? '') ?? DateTime.now();
-                      final items = order['orderItems'] ?? order['items'] ?? [];
+                      final orderNumber = order['orderNumber'] ??
+                          '#${order['orderId']?.toString().substring(0, 8) ?? index}';
+                      final total =
+                          (order['totalAmount'] ?? order['total'] ?? 0.0)
+                              .toDouble();
+                      final createdAt =
+                          DateTime.tryParse(order['createdAt'] ?? '') ??
+                              DateTime.now();
+                      final items =
+                          order['orderItems'] ?? order['items'] ?? [];
                       final statusColor = _getStatusColor(status);
 
                       return Container(
@@ -129,30 +177,41 @@ class _OrderScreenState extends State<OrderScreen> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
-                          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
+                          boxShadow: const [
+                            BoxShadow(color: Colors.black12, blurRadius: 5)
+                          ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Header row
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(orderNumber,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15)),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
                                   decoration: BoxDecoration(
                                     color: statusColor.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Row(
                                     children: [
-                                      Icon(_getStatusIcon(status), color: statusColor, size: 14),
+                                      Icon(_getStatusIcon(status),
+                                          color: statusColor, size: 14),
                                       const SizedBox(width: 4),
                                       Text(
-                                        status[0].toUpperCase() + status.substring(1),
-                                        style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold),
+                                        status[0].toUpperCase() +
+                                            status.substring(1),
+                                        style: TextStyle(
+                                            color: statusColor,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold),
                                       ),
                                     ],
                                   ),
@@ -163,35 +222,45 @@ class _OrderScreenState extends State<OrderScreen> {
 
                             // Items list
                             ...(items as List).map((item) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 2),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "${item['quantity']}x ${item['foodName'] ?? item['food_name'] ?? ''}",
-                                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 2),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "${item['quantity']}x ${item['foodName'] ?? item['food_name'] ?? ''}",
+                                        style: const TextStyle(
+                                            color: Colors.grey, fontSize: 13),
+                                      ),
+                                      Text(
+                                        "\$${((item['price'] ?? 0.0) * (item['quantity'] ?? 1)).toStringAsFixed(2)}",
+                                        style:
+                                            const TextStyle(fontSize: 13),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    "\$${((item['price'] ?? 0.0) * (item['quantity'] ?? 1)).toStringAsFixed(2)}",
-                                    style: const TextStyle(fontSize: 13),
-                                  ),
-                                ],
-                              ),
-                            )),
+                                )),
 
                             const Divider(height: 20),
 
                             // Footer
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  DateFormat('dd MMM yyyy, hh:mm a').format(createdAt),
-                                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                  DateFormat('dd MMM yyyy, hh:mm a')
+                                      .format(createdAt),
+                                  style: const TextStyle(
+                                      fontSize: 12, color: Colors.grey),
                                 ),
                                 Text(
                                   "\$${total.toStringAsFixed(2)}",
-                                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.orange, fontSize: 16),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.orange,
+                                      fontSize: 16),
                                 ),
                               ],
                             ),

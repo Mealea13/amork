@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 namespace AmorkApp.Controllers;
 
@@ -59,11 +60,9 @@ public class FavoritesController : ControllerBase
         var userId = GetUserIdFromToken();
         if (userId == null) return Unauthorized();
 
-        // Check food exists
         var food = await _context.Foods.FindAsync(request.FoodId);
         if (food == null) return NotFound(new { message = "Food not found" });
 
-        // Check already favorited
         var exists = await _context.Favorites
             .AnyAsync(f => f.UserId == userId && f.FoodId == request.FoodId);
         if (exists) return Ok(new { message = "Already in favorites" });
@@ -121,5 +120,6 @@ public class FavoritesController : ControllerBase
 
 public class FavoriteRequest
 {
+    [JsonPropertyName("food_id")]
     public int FoodId { get; set; }
 }

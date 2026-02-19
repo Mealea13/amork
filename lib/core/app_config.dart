@@ -1,7 +1,7 @@
 //lib/core/app_config.dart
 
 class AppConfig {
-  static const String baseUrl = 'http://localhost:5000';
+  static const String baseUrl = 'http://192.168.100.7:5000';
 
   // All endpoints are built from baseUrl automatically
   static const String authEndpoint       = "$baseUrl/api/auth";

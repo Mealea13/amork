@@ -3,7 +3,7 @@ class FoodModel {
   final String name;
   final String description;
   final double price;
-  final double? originalPrice; // NEW: Added for discount logic
+  final double? originalPrice;
   final int calories;
   final String time;
   final String imageUrl;
