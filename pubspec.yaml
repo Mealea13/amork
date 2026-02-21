@@ -9,7 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # Merged Dependencies (Your project + Friend's project)
   google_fonts: ^6.1.0
   http: ^1.6.0
   provider: ^6.1.1

@@ -1104,7 +1104,7 @@
         ".signature.p7s",
         "bcrypt.net-next.4.0.3.nupkg.sha512",
         "bcrypt.net-next.nuspec",
-        "ico.png",
+        "ico.webp",
         "lib/net20/BCrypt.Net-Next.dll",
         "lib/net20/BCrypt.Net-Next.xml",
         "lib/net35/BCrypt.Net-Next.dll",
@@ -1141,7 +1141,7 @@
         "lib/netstandard1.0/Humanizer.xml",
         "lib/netstandard2.0/Humanizer.dll",
         "lib/netstandard2.0/Humanizer.xml",
-        "logo.png"
+        "logo.webp"
       ]
     },
     "Microsoft.AspNetCore.Authentication.JwtBearer/9.0.0": {
@@ -1151,7 +1151,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
         "lib/net9.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll",
@@ -1167,7 +1167,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
         "lib/net9.0/Microsoft.AspNetCore.OpenApi.dll",
@@ -1183,7 +1183,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
         "buildTransitive/net461/Microsoft.Bcl.AsyncInterfaces.targets",
@@ -1206,7 +1206,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "MSBuild-NuGet-Icon.png",
+        "MSBuild-NuGet-Icon.webp",
         "README.md",
         "lib/net472/Microsoft.Build.Framework.dll",
         "lib/net472/Microsoft.Build.Framework.pdb",
@@ -1232,7 +1232,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "MSBuild-NuGet-Icon.png",
+        "MSBuild-NuGet-Icon.webp",
         "build/Microsoft.Build.Locator.props",
         "build/Microsoft.Build.Locator.targets",
         "lib/net46/Microsoft.Build.Locator.dll",
@@ -1249,7 +1249,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "ThirdPartyNotices.txt",
         "analyzers/dotnet/cs/Microsoft.CodeAnalysis.Analyzers.dll",
         "analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.Analyzers.dll",
@@ -1849,7 +1849,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "ThirdPartyNotices.rtf",
         "lib/net6.0/Microsoft.CodeAnalysis.dll",
         "lib/net6.0/Microsoft.CodeAnalysis.pdb",
@@ -1910,7 +1910,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "ThirdPartyNotices.rtf",
         "lib/net6.0/Microsoft.CodeAnalysis.CSharp.dll",
         "lib/net6.0/Microsoft.CodeAnalysis.CSharp.pdb",
@@ -1971,7 +1971,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "ThirdPartyNotices.rtf",
         "lib/net6.0/Microsoft.CodeAnalysis.CSharp.Workspaces.dll",
         "lib/net6.0/Microsoft.CodeAnalysis.CSharp.Workspaces.pdb",
@@ -2032,7 +2032,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "ThirdPartyNotices.rtf",
         "lib/net6.0/Microsoft.CodeAnalysis.Workspaces.dll",
         "lib/net6.0/Microsoft.CodeAnalysis.Workspaces.pdb",
@@ -2093,7 +2093,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "ThirdPartyNotices.rtf",
         "lib/net472/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.exe",
         "lib/net472/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.pdb",
@@ -2165,7 +2165,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "PACKAGE.md",
         "buildTransitive/net8.0/Microsoft.EntityFrameworkCore.props",
         "lib/net8.0/Microsoft.EntityFrameworkCore.dll",
@@ -2181,7 +2181,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "PACKAGE.md",
         "lib/net8.0/Microsoft.EntityFrameworkCore.Abstractions.dll",
         "lib/net8.0/Microsoft.EntityFrameworkCore.Abstractions.xml",
@@ -2196,7 +2196,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "analyzers/dotnet/cs/Microsoft.EntityFrameworkCore.Analyzers.dll",
         "docs/PACKAGE.md",
         "microsoft.entityframeworkcore.analyzers.9.0.0.nupkg.sha512",
@@ -2210,7 +2210,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "PACKAGE.md",
         "build/net8.0/Microsoft.EntityFrameworkCore.Design.props",
         "lib/net8.0/Microsoft.EntityFrameworkCore.Design.dll",
@@ -2226,7 +2226,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "PACKAGE.md",
         "lib/net8.0/Microsoft.EntityFrameworkCore.Relational.dll",
         "lib/net8.0/Microsoft.EntityFrameworkCore.Relational.xml",
@@ -2241,7 +2241,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
@@ -2269,7 +2269,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
@@ -2297,7 +2297,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
@@ -2325,7 +2325,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
@@ -2355,7 +2355,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
@@ -2385,7 +2385,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
@@ -2413,7 +2413,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
@@ -2443,7 +2443,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
@@ -2514,7 +2514,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
@@ -2559,7 +2559,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
@@ -2776,7 +2776,7 @@
         "lib/net8.0/Npgsql.xml",
         "npgsql.9.0.0.nupkg.sha512",
         "npgsql.nuspec",
-        "postgresql.png"
+        "postgresql.webp"
       ]
     },
     "Npgsql.EntityFrameworkCore.PostgreSQL/9.0.0": {
@@ -2791,7 +2791,7 @@
         "lib/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.xml",
         "npgsql.entityframeworkcore.postgresql.9.0.0.nupkg.sha512",
         "npgsql.entityframeworkcore.postgresql.nuspec",
-        "postgresql.png"
+        "postgresql.webp"
       ]
     },
     "System.CodeDom/6.0.0": {
@@ -2801,7 +2801,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
         "buildTransitive/netcoreapp2.0/System.CodeDom.targets",
@@ -2824,7 +2824,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "README.md",
         "THIRD-PARTY-NOTICES.TXT",
@@ -2852,7 +2852,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
         "buildTransitive/net461/System.Composition.targets",
@@ -2874,7 +2874,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
         "buildTransitive/net461/System.Composition.AttributedModel.targets",
@@ -2901,7 +2901,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
         "buildTransitive/net461/System.Composition.Convention.targets",
@@ -2928,7 +2928,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
         "buildTransitive/net461/System.Composition.Hosting.targets",
@@ -2955,7 +2955,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
         "buildTransitive/net461/System.Composition.Runtime.targets",
@@ -2982,7 +2982,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
         "buildTransitive/net461/System.Composition.TypedParts.targets",
@@ -3035,7 +3035,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
         "buildTransitive/net461/System.IO.Pipelines.targets",
@@ -3062,7 +3062,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "README.md",
         "THIRD-PARTY-NOTICES.TXT",
@@ -3090,7 +3090,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
         "buildTransitive/netcoreapp2.0/System.Runtime.CompilerServices.Unsafe.targets",
@@ -3115,7 +3115,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
@@ -3186,7 +3186,7 @@
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
+        "Icon.webp",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
         "buildTransitive/net461/System.Threading.Channels.targets",

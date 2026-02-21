@@ -124,14 +124,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
         child: Column(
           children: [
             _paymentCard(
-              imagePath: "assets/images/Cash on delivery.png",
+              imagePath: "assets/images/Cash on delivery.webp",
               title: "Cash on Delivery",
               isSelected: selected == "Cash",
               onTap: () => setState(() => selected = "Cash"),
             ),
             const SizedBox(height: 15),
             _paymentCard(
-              imagePath: "assets/images/QR icon.png",
+              imagePath: "assets/images/QR icon.webp",
               title: "QR Payment",
               isSelected: selected == "QR",
               onTap: () => setState(() => selected = "QR"),

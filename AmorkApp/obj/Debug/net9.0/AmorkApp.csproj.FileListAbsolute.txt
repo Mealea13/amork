@@ -1,12 +1,3 @@
-D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.csproj.AssemblyReference.cache
-D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\rpswa.dswa.cache.json
-D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.GeneratedMSBuildEditorConfig.editorconfig
-D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.AssemblyInfoInputs.cache
-D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.AssemblyInfo.cs
-D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.csproj.CoreCompileInputs.cache
-D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.MvcApplicationPartsAssemblyInfo.cs
-D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.MvcApplicationPartsAssemblyInfo.cache
-D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.sourcelink.json
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\appsettings.Development.json
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\appsettings.json
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\AmorkApp.staticwebassets.runtime.json
@@ -18,6 +9,7 @@ D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\AmorkApp.dll
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\AmorkApp.pdb
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\BCrypt.Net-Next.dll
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Humanizer.dll
+D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Microsoft.AspNetCore.OpenApi.dll
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Microsoft.Bcl.AsyncInterfaces.dll
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Microsoft.Build.Locator.dll
@@ -35,6 +27,8 @@ D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Microsoft.Extensions.DependencyModel.d
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Microsoft.IdentityModel.Abstractions.dll
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Microsoft.IdentityModel.JsonWebTokens.dll
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Microsoft.IdentityModel.Logging.dll
+D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.dll
+D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Microsoft.IdentityModel.Tokens.dll
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Microsoft.OpenApi.dll
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Mono.TextTemplating.dll
@@ -112,6 +106,15 @@ D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.Workspaces.M
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.csproj.AssemblyReference.cache
+D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\rpswa.dswa.cache.json
+D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.GeneratedMSBuildEditorConfig.editorconfig
+D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.AssemblyInfoInputs.cache
+D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.AssemblyInfo.cs
+D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.csproj.CoreCompileInputs.cache
+D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.MvcApplicationPartsAssemblyInfo.cs
+D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.MvcApplicationPartsAssemblyInfo.cache
+D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.sourcelink.json
 D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\rjimswa.dswa.cache.json
 D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
 D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json
@@ -126,6 +129,3 @@ D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\refint\AmorkApp.dll
 D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.pdb
 D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\AmorkApp.genruntimeconfig.cache
 D:\Mobile\amork\AmorkApp\obj\Debug\net9.0\ref\AmorkApp.dll
-D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
-D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.dll
-D:\Mobile\amork\AmorkApp\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll

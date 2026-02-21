@@ -148,9 +148,11 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
       body: _isLoading
       ? GridView.builder(
           padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, crossAxisSpacing: 14,
-            mainAxisSpacing: 14, childAspectRatio: 0.78,
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 250, // ✅ ensures min width ~125px
+            crossAxisSpacing: 14,
+            mainAxisSpacing: 14,
+            mainAxisExtent: 195, // ✅ fixed height
           ),
           itemCount: 6,
           itemBuilder: (_, __) => const FavoriteCardSkeleton(),
@@ -194,11 +196,11 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                   child: GridView.builder(
                     padding: const EdgeInsets.all(16),
                     gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount:   2,
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 250, // ✅ ensures min width ~125px
                       crossAxisSpacing: 14,
                       mainAxisSpacing:  14,
-                      childAspectRatio: 0.78, // ✅ controls card height ratio
+                      mainAxisExtent: 195, // ✅ fixed height of 195px
                     ),
                     itemCount: _favorites.length,
                     itemBuilder: (context, index) {

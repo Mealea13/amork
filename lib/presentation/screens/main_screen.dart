@@ -41,17 +41,17 @@ class _MainScreenState extends State<MainScreen> {
   // 🖼️ Replace these with your actual asset paths
   final List<Map<String, String>> _ads = [
     {
-      'image': 'assets/images/ads-1.png',
+      'image': 'assets/images/ads-1.webp',
       'title': 'Special Offer!',
       'subtitle': '20% off all burgers today',
     },
     {
-      'image': 'assets/images/ads-2.png',
+      'image': 'assets/images/ads-2.webp',
       'title': 'Great day with good snack 🍹',
       'subtitle': 'Try our refreshing summer drinks',
     },
     {
-      'image': 'assets/images/ads-3.png',
+      'image': 'assets/images/ads-3.webp',
       'title': 'New Arrival 🍹',
       'subtitle': 'Try our refreshing summer drinks',
     },
@@ -562,10 +562,10 @@ class _MainScreenState extends State<MainScreen> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         children: [
-          _categoryItem("Food",    "assets/images/food.png"),
-          _categoryItem("Drink",   "assets/images/Drink.png"),
-          _categoryItem("Dessert", "assets/images/Dessert.png"),
-          _categoryItem("Snack",   "assets/images/snack.png"),
+          _categoryItem("Food",    "assets/images/food.webp"),
+          _categoryItem("Drink",   "assets/images/Drink.webp"),
+          _categoryItem("Dessert", "assets/images/Dessert.webp"),
+          _categoryItem("Snack",   "assets/images/snack.webp"),
         ],
       ),
     );

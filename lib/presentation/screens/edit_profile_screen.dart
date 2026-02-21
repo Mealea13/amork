@@ -108,7 +108,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         );
         request.headers['Authorization'] = 'Bearer $token';
         request.files.add(http.MultipartFile.fromBytes(
-          'image', _pickedImageBytes!, filename: 'profile.png',
+          'image', _pickedImageBytes!, filename: 'profile.webp',
         ));
         await request.send();
       }
