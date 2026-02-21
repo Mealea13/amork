@@ -31,7 +31,7 @@ class WelcomeScreen extends StatelessWidget {
               ),
               child: Center(
                 child: Image.asset(
-                  'assets/images/welcome_screen_amok.png',
+                  'assets/images/welcome_screen_amok.webp',
                   fit: BoxFit.contain,
                 ),
               ),

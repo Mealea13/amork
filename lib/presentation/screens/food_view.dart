@@ -18,38 +18,38 @@ class _FoodViewState extends State<FoodView> {
   bool _isLoading = true;
 
   final List<FoodModel> popularFoods = [
-    FoodModel(id: 1,   name: "Avocado nido Salad",  categoryId: 1, price: 4.05,  imageUrl: "assets/images/Salad.png",         description: "Healthy and fresh green salad",      calories: 150, time: "10 min"),
-    FoodModel(id: 2,   name: "Cambodia Fish Amork",  categoryId: 1, price: 6.00,  imageUrl: "assets/images/amork.png",         description: "Traditional Cambodian dish",         calories: 350, time: "25 min"),
-    FoodModel(id: 101, name: "Kuy Teav",             categoryId: 1, price: 3.50,  imageUrl: "assets/images/Kuy teav.png",      description: "Pork broth noodle soup",             calories: 400, time: "15 min"),
-    FoodModel(id: 102, name: "Papaya Salad",         categoryId: 1, price: 2.50,  imageUrl: "assets/images/Papaya Salad.png",  description: "Spicy and sour green papaya",        calories: 120, time: "10 min"),
-    FoodModel(id: 103, name: "Tom Yum Goong",        categoryId: 1, price: 7.00,  imageUrl: "assets/images/tong yum.png",      description: "Spicy Thai shrimp soup",             calories: 250, time: "20 min"),
-    FoodModel(id: 104, name: "Sushi Platter",        categoryId: 1, price: 12.00, imageUrl: "assets/images/Sushi.png",         description: "Fresh salmon and tuna sushi",        calories: 450, time: "15 min"),
+    FoodModel(id: 1,   name: "Avocado nido Salad",  categoryId: 1, price: 4.05,  imageUrl: "assets/images/Salad.webp",         description: "Healthy and fresh green salad",      calories: 150, time: "10 min"),
+    FoodModel(id: 2,   name: "Cambodia Fish Amork",  categoryId: 1, price: 6.00,  imageUrl: "assets/images/amork.webp",         description: "Traditional Cambodian dish",         calories: 350, time: "25 min"),
+    FoodModel(id: 101, name: "Kuy Teav",             categoryId: 1, price: 3.50,  imageUrl: "assets/images/Kuy teav.webp",      description: "Pork broth noodle soup",             calories: 400, time: "15 min"),
+    FoodModel(id: 102, name: "Papaya Salad",         categoryId: 1, price: 2.50,  imageUrl: "assets/images/Papaya Salad.webp",  description: "Spicy and sour green papaya",        calories: 120, time: "10 min"),
+    FoodModel(id: 103, name: "Tom Yum Goong",        categoryId: 1, price: 7.00,  imageUrl: "assets/images/tong yum.webp",      description: "Spicy Thai shrimp soup",             calories: 250, time: "20 min"),
+    FoodModel(id: 104, name: "Sushi Platter",        categoryId: 1, price: 12.00, imageUrl: "assets/images/Sushi.webp",         description: "Fresh salmon and tuna sushi",        calories: 450, time: "15 min"),
   ];
 
   final List<FoodModel> bestSelling = [
-    FoodModel(id: 3,   name: "Special Beef Burger",  categoryId: 1, price: 5.50,  imageUrl: "assets/images/Burger.png",        description: "Double beef with extra cheese",      calories: 600, time: "15 min"),
-    FoodModel(id: 8,   name: "Classic Pizza",        categoryId: 1, price: 8.00,  imageUrl: "assets/images/pizza.png",         description: "Cheesy classic pizza",               calories: 800, time: "30 min"),
-    FoodModel(id: 105, name: "Beef Lok Lak",         categoryId: 1, price: 6.50,  imageUrl: "assets/images/lok lak.png",       description: "Stir-fried beef with pepper sauce",  calories: 550, time: "20 min"),
-    FoodModel(id: 106, name: "Grilled Steak",        categoryId: 1, price: 15.00, imageUrl: "assets/images/Steak.png",         description: "Premium ribeye medium rare",         calories: 700, time: "25 min"),
-    FoodModel(id: 107, name: "Lot Cha",              categoryId: 1, price: 1.50,  imageUrl: "assets/images/lot cha.png",       description: "Cambodian short noodle lot cha",     calories: 500, time: "15 min"),
-    FoodModel(id: 108, name: "Spicy Ramen",          categoryId: 1, price: 5.00,  imageUrl: "assets/images/Ramen.png",         description: "Japanese noodle soup",               calories: 480, time: "15 min"),
+    FoodModel(id: 3,   name: "Special Beef Burger",  categoryId: 1, price: 5.50,  imageUrl: "assets/images/Burger.webp",        description: "Double beef with extra cheese",      calories: 600, time: "15 min"),
+    FoodModel(id: 8,   name: "Classic Pizza",        categoryId: 1, price: 8.00,  imageUrl: "assets/images/pizza.webp",         description: "Cheesy classic pizza",               calories: 800, time: "30 min"),
+    FoodModel(id: 105, name: "Beef Lok Lak",         categoryId: 1, price: 6.50,  imageUrl: "assets/images/lok lak.webp",       description: "Stir-fried beef with pepper sauce",  calories: 550, time: "20 min"),
+    FoodModel(id: 106, name: "Grilled Steak",        categoryId: 1, price: 15.00, imageUrl: "assets/images/Steak.webp",         description: "Premium ribeye medium rare",         calories: 700, time: "25 min"),
+    FoodModel(id: 107, name: "Lot Cha",              categoryId: 1, price: 1.50,  imageUrl: "assets/images/lot cha.webp",       description: "Cambodian short noodle lot cha",     calories: 500, time: "15 min"),
+    FoodModel(id: 108, name: "Spicy Ramen",          categoryId: 1, price: 5.00,  imageUrl: "assets/images/Ramen.webp",         description: "Japanese noodle soup",               calories: 480, time: "15 min"),
   ];
 
   final List<FoodModel> khmerNewYear = [
-    FoodModel(id: 9,   name: "Num Ansorm",           categoryId: 1, price: 2.50,  imageUrl: "assets/images/ansorm.png",        description: "Traditional sticky rice cake",       calories: 350, time: "10 min"),
-    FoodModel(id: 10,  name: "Khmer Curry",          categoryId: 1, price: 5.00,  imageUrl: "assets/images/Curry.png",         description: "Rich and spicy chicken curry",       calories: 500, time: "25 min"),
-    FoodModel(id: 109, name: "Prahok Ktis",          categoryId: 1, price: 4.00,  imageUrl: "assets/images/Brohok.png",        description: "Minced pork with fermented fish",    calories: 400, time: "20 min"),
-    FoodModel(id: 110, name: "Bai Sach Chrouk",      categoryId: 1, price: 2.00,  imageUrl: "assets/images/Bay sach jruk.png",description: "Pork and rice breakfast",            calories: 450, time: "5 min"),
-    FoodModel(id: 111, name: "Kralan",               categoryId: 1, price: 1.50,  imageUrl: "assets/images/krolan.png",        description: "Bamboo sticky rice",                 calories: 200, time: "5 min"),
-    FoodModel(id: 112, name: "Nom Banh Chok",        categoryId: 1, price: 2.50,  imageUrl: "assets/images/Nom banh jok.png",  description: "Khmer noodles with fish gravy",      calories: 300, time: "10 min"),
+    FoodModel(id: 9,   name: "Num Ansorm",           categoryId: 1, price: 2.50,  imageUrl: "assets/images/ansorm.webp",        description: "Traditional sticky rice cake",       calories: 350, time: "10 min"),
+    FoodModel(id: 10,  name: "Khmer Curry",          categoryId: 1, price: 5.00,  imageUrl: "assets/images/Curry.webp",         description: "Rich and spicy chicken curry",       calories: 500, time: "25 min"),
+    FoodModel(id: 109, name: "Prahok Ktis",          categoryId: 1, price: 4.00,  imageUrl: "assets/images/Brohok.webp",        description: "Minced pork with fermented fish",    calories: 400, time: "20 min"),
+    FoodModel(id: 110, name: "Bai Sach Chrouk",      categoryId: 1, price: 2.00,  imageUrl: "assets/images/Bay sach jruk.webp",description: "Pork and rice breakfast",            calories: 450, time: "5 min"),
+    FoodModel(id: 111, name: "Kralan",               categoryId: 1, price: 1.50,  imageUrl: "assets/images/krolan.webp",        description: "Bamboo sticky rice",                 calories: 200, time: "5 min"),
+    FoodModel(id: 112, name: "Nom Banh Chok",        categoryId: 1, price: 2.50,  imageUrl: "assets/images/Nom banh jok.webp",  description: "Khmer noodles with fish gravy",      calories: 300, time: "10 min"),
   ];
 
   final List<FoodModel> discountFoods = [
-    FoodModel(id: 11,  name: "Spicy Wings",          categoryId: 1, price: 3.00, originalPrice: 6.00, imageUrl: "assets/images/wings grill.png", description: "Hot and spicy chicken wings",  calories: 400, time: "15 min"),
-    FoodModel(id: 12,  name: "Fried Rice",           categoryId: 1, price: 2.50, originalPrice: 5.00, imageUrl: "assets/images/Bay cha.png",      description: "Pork fried rice with egg",     calories: 450, time: "20 min"),
-    FoodModel(id: 113, name: "Beef Tacos",           categoryId: 1, price: 3.50, originalPrice: 7.00, imageUrl: "assets/images/Tacos.png",        description: "Mexican street tacos",         calories: 300, time: "10 min"),
-    FoodModel(id: 114, name: "Pork Dumplings",       categoryId: 1, price: 2.00, originalPrice: 4.00, imageUrl: "assets/images/dumpling.png",     description: "Steamed meat dumplings",       calories: 250, time: "15 min"),
-    FoodModel(id: 115, name: "Dim Sum",              categoryId: 1, price: 4.00, originalPrice: 8.00, imageUrl: "assets/images/dum sum.png",      description: "Assorted Chinese bites",       calories: 350, time: "20 min"),
+    FoodModel(id: 11,  name: "Spicy Wings",          categoryId: 1, price: 3.00, originalPrice: 6.00, imageUrl: "assets/images/wings grill.webp", description: "Hot and spicy chicken wings",  calories: 400, time: "15 min"),
+    FoodModel(id: 12,  name: "Fried Rice",           categoryId: 1, price: 2.50, originalPrice: 5.00, imageUrl: "assets/images/Bay cha.webp",      description: "Pork fried rice with egg",     calories: 450, time: "20 min"),
+    FoodModel(id: 113, name: "Beef Tacos",           categoryId: 1, price: 3.50, originalPrice: 7.00, imageUrl: "assets/images/Tacos.webp",        description: "Mexican street tacos",         calories: 300, time: "10 min"),
+    FoodModel(id: 114, name: "Pork Dumplings",       categoryId: 1, price: 2.00, originalPrice: 4.00, imageUrl: "assets/images/dumpling.webp",     description: "Steamed meat dumplings",       calories: 250, time: "15 min"),
+    FoodModel(id: 115, name: "Dim Sum",              categoryId: 1, price: 4.00, originalPrice: 8.00, imageUrl: "assets/images/dum sum.webp",      description: "Assorted Chinese bites",       calories: 350, time: "20 min"),
   ];
 
   @override

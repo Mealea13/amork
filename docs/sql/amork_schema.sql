@@ -51,6 +51,10 @@ CREATE TABLE user_sessions (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_used TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ============================================
+-- 2. CATEGORIES & FOODS
+-- ============================================
 CREATE TABLE categories (
     category_id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
@@ -83,6 +87,10 @@ CREATE TABLE foods (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ============================================
+-- 3. CART
+-- ============================================
 CREATE TABLE cart_items (
     cart_item_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
@@ -125,6 +133,7 @@ CREATE TABLE orders (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ✅ FIXED: Added special_instructions column
 CREATE TABLE order_items (
     order_item_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     order_id UUID NOT NULL REFERENCES orders(order_id) ON DELETE CASCADE,
@@ -133,6 +142,7 @@ CREATE TABLE order_items (
     quantity INTEGER NOT NULL CHECK (quantity > 0),
     unit_price DECIMAL(10, 2) NOT NULL,
     subtotal DECIMAL(10, 2) NOT NULL,
+    special_instructions TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -292,6 +302,7 @@ CREATE INDEX idx_foods_available ON foods(is_available) WHERE is_available = TRU
 CREATE INDEX idx_cart_user ON cart_items(user_id);
 CREATE INDEX idx_orders_user ON orders(user_id);
 CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_order_items_order ON order_items(order_id);
 CREATE INDEX idx_reviews_food ON reviews(food_id);
 CREATE INDEX idx_favorites_user ON favorites(user_id);
 CREATE INDEX idx_notifications_user ON notifications(user_id);
@@ -308,10 +319,18 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_foods_updated_at BEFORE UPDATE ON foods FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_cart_items_updated_at BEFORE UPDATE ON cart_items FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_users_updated_at
+    BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_categories_updated_at
+    BEFORE UPDATE ON categories FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_foods_updated_at
+    BEFORE UPDATE ON foods FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_cart_items_updated_at
+    BEFORE UPDATE ON cart_items FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_orders_updated_at
+    BEFORE UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_payments_updated_at
+    BEFORE UPDATE ON payments FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE OR REPLACE FUNCTION update_food_rating()
 RETURNS TRIGGER AS $$
@@ -325,11 +344,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_food_rating_trigger
-AFTER INSERT OR UPDATE ON reviews
-FOR EACH ROW EXECUTE FUNCTION update_food_rating();
+    AFTER INSERT OR UPDATE ON reviews
+    FOR EACH ROW EXECUTE FUNCTION update_food_rating();
 
 -- ============================================
--- APP SETTINGS
+-- APP SETTINGS SEED DATA
 -- ============================================
 INSERT INTO app_settings (setting_key, setting_value, description, is_public) VALUES
 ('delivery_fee',            '1.00',  'Default delivery fee in USD', TRUE),
@@ -338,118 +357,118 @@ INSERT INTO app_settings (setting_key, setting_value, description, is_public) VA
 ('free_delivery_threshold', '20.00', 'Free delivery above this',    TRUE);
 
 -- ============================================
--- CATEGORIES
+-- CATEGORIES SEED DATA
 -- ============================================
 INSERT INTO categories (category_id, name, description, icon, color, display_order) VALUES
-(1, 'Food',    'Delicious main dishes',     'food_icon.png',    '#FF6B6B', 1),
-(2, 'Drink',   'Refreshing beverages',      'drink_icon.png',   '#4ECDC4', 2),
-(3, 'Dessert', 'Sweet treats and desserts', 'dessert_icon.png', '#95E1D3', 3),
-(4, 'Snack',   'Light bites and snacks',    'snack_icon.png',   '#FFE66D', 4);
+(1, 'Food',    'Delicious main dishes',     'food_icon.webp',    '#FF6B6B', 1),
+(2, 'Drink',   'Refreshing beverages',      'drink_icon.webp',   '#4ECDC4', 2),
+(3, 'Dessert', 'Sweet treats and desserts', 'dessert_icon.webp', '#95E1D3', 3),
+(4, 'Snack',   'Light bites and snacks',    'snack_icon.webp',   '#FFE66D', 4);
 
 SELECT setval('categories_category_id_seq', 4);
 
 -- ============================================
--- FOOD (category 1)
+-- FOOD SEED DATA (category 1)
 -- ============================================
 INSERT INTO foods (food_id, category_id, food_name, description, price, original_price, image_url, calories, cooking_time, rating, is_popular, is_available) VALUES
-(1,   1, 'Avocado nido Salad',  'Healthy and fresh green salad',    4.05, NULL, 'assets/images/Salad.png',         150, '10 min', 4.5, TRUE,  TRUE),
-(2,   1, 'Cambodia Fish Amork', 'Traditional Cambodian dish',       6.00, NULL, 'assets/images/amork.png',         350, '25 min', 4.8, TRUE,  TRUE),
-(3,   1, 'Special Beef Burger', 'Double beef with extra cheese',    5.50, NULL, 'assets/images/Burger.png',        600, '15 min', 4.7, TRUE,  TRUE),
-(8,   1, 'Classic Pizza',       'Cheesy classic pizza',             8.00, NULL, 'assets/images/pizza.png',         800, '30 min', 4.6, TRUE,  TRUE),
-(9,   1, 'Num Ansorm',          'Traditional sticky rice cake',     2.50, NULL, 'assets/images/ansorm.png',        350, '10 min', 4.4, FALSE, TRUE),
-(10,  1, 'Khmer Curry',         'Rich and spicy chicken curry',     5.00, NULL, 'assets/images/Curry.png',         500, '25 min', 4.6, FALSE, TRUE),
-(11,  1, 'Spicy Wings',         'Hot and spicy chicken wings',      3.00, 6.00, 'assets/images/wings grill.png',   400, '15 min', 4.7, TRUE,  TRUE),
-(12,  1, 'Fried Rice',          'Pork fried rice with egg',         2.50, 5.00, 'assets/images/Bay cha.png',       450, '20 min', 4.5, TRUE,  TRUE),
-(101, 1, 'Kuy Teav',            'Pork broth noodle soup',           3.50, NULL, 'assets/images/Kuy teav.png',      400, '15 min', 4.5, TRUE,  TRUE),
-(102, 1, 'Papaya Salad',        'Spicy and sour green papaya',      2.50, NULL, 'assets/images/Papaya Salad.png',  120, '10 min', 4.3, TRUE,  TRUE),
-(103, 1, 'Tom Yum Goong',       'Spicy Thai shrimp soup',           7.00, NULL, 'assets/images/tong yum.png',      250, '20 min', 4.7, TRUE,  TRUE),
-(104, 1, 'Sushi Platter',       'Fresh salmon and tuna sushi',     12.00, NULL, 'assets/images/Sushi.png',         450, '15 min', 4.8, TRUE,  TRUE),
-(105, 1, 'Beef Lok Lak',        'Stir-fried beef with pepper sauce',6.50, NULL, 'assets/images/lok lak.png',       550, '20 min', 4.6, TRUE,  TRUE),
-(106, 1, 'Grilled Steak',       'Premium ribeye medium rare',      15.00, NULL, 'assets/images/Steak.png',         700, '25 min', 4.9, TRUE,  TRUE),
-(107, 1, 'Lot Cha',             'Cambodian short noodle lot cha',   1.50, NULL, 'assets/images/lot cha.png',       500, '15 min', 4.4, FALSE, TRUE),
-(108, 1, 'Spicy Ramen',         'Japanese noodle soup',             5.00, NULL, 'assets/images/Ramen.png',         480, '15 min', 4.6, TRUE,  TRUE),
-(109, 1, 'Prahok Ktis',         'Minced pork with fermented fish',  4.00, NULL, 'assets/images/Brohok.png',        400, '20 min', 4.3, FALSE, TRUE),
-(110, 1, 'Bai Sach Chrouk',     'Pork and rice breakfast',          2.00, NULL, 'assets/images/Bay sach jruk.png', 450, '5 min',  4.5, FALSE, TRUE),
-(111, 1, 'Kralan',              'Bamboo sticky rice',               1.50, NULL, 'assets/images/krolan.png',        200, '5 min',  4.2, FALSE, TRUE),
-(112, 1, 'Nom Banh Chok',       'Khmer noodles with fish gravy',    2.50, NULL, 'assets/images/Nom banh jok.png',  300, '10 min', 4.5, FALSE, TRUE),
-(113, 1, 'Beef Tacos',          'Mexican street tacos',             3.50, 7.00, 'assets/images/Tacos.png',         300, '10 min', 4.4, FALSE, TRUE),
-(114, 1, 'Pork Dumplings',      'Steamed meat dumplings',           2.00, 4.00, 'assets/images/dumpling.png',      250, '15 min', 4.5, FALSE, TRUE),
-(115, 1, 'Dim Sum',             'Assorted Chinese bites',           4.00, 8.00, 'assets/images/dum sum.png',       350, '20 min', 4.6, FALSE, TRUE);
+(1,   1, 'Avocado nido Salad',  'Healthy and fresh green salad',     4.05, NULL, 'assets/images/Salad.webp',         150, '10 min', 4.5, TRUE,  TRUE),
+(2,   1, 'Cambodia Fish Amork', 'Traditional Cambodian dish',        6.00, NULL, 'assets/images/amork.webp',         350, '25 min', 4.8, TRUE,  TRUE),
+(3,   1, 'Special Beef Burger', 'Double beef with extra cheese',     5.50, NULL, 'assets/images/Burger.webp',        600, '15 min', 4.7, TRUE,  TRUE),
+(8,   1, 'Classic Pizza',       'Cheesy classic pizza',              8.00, NULL, 'assets/images/pizza.webp',         800, '30 min', 4.6, TRUE,  TRUE),
+(9,   1, 'Num Ansorm',          'Traditional sticky rice cake',      2.50, NULL, 'assets/images/ansorm.webp',        350, '10 min', 4.4, FALSE, TRUE),
+(10,  1, 'Khmer Curry',         'Rich and spicy chicken curry',      5.00, NULL, 'assets/images/Curry.webp',         500, '25 min', 4.6, FALSE, TRUE),
+(11,  1, 'Spicy Wings',         'Hot and spicy chicken wings',       3.00, 6.00, 'assets/images/wings grill.webp',   400, '15 min', 4.7, TRUE,  TRUE),
+(12,  1, 'Fried Rice',          'Pork fried rice with egg',          2.50, 5.00, 'assets/images/Bay cha.webp',       450, '20 min', 4.5, TRUE,  TRUE),
+(101, 1, 'Kuy Teav',            'Pork broth noodle soup',            3.50, NULL, 'assets/images/Kuy teav.webp',      400, '15 min', 4.5, TRUE,  TRUE),
+(102, 1, 'Papaya Salad',        'Spicy and sour green papaya',       2.50, NULL, 'assets/images/Papaya Salad.webp',  120, '10 min', 4.3, TRUE,  TRUE),
+(103, 1, 'Tom Yum Goong',       'Spicy Thai shrimp soup',            7.00, NULL, 'assets/images/tong yum.webp',      250, '20 min', 4.7, TRUE,  TRUE),
+(104, 1, 'Sushi Platter',       'Fresh salmon and tuna sushi',      12.00, NULL, 'assets/images/Sushi.webp',         450, '15 min', 4.8, TRUE,  TRUE),
+(105, 1, 'Beef Lok Lak',        'Stir-fried beef with pepper sauce', 6.50, NULL, 'assets/images/lok lak.webp',       550, '20 min', 4.6, TRUE,  TRUE),
+(106, 1, 'Grilled Steak',       'Premium ribeye medium rare',       15.00, NULL, 'assets/images/Steak.webp',         700, '25 min', 4.9, TRUE,  TRUE),
+(107, 1, 'Lot Cha',             'Cambodian short noodle lot cha',    1.50, NULL, 'assets/images/lot cha.webp',       500, '15 min', 4.4, FALSE, TRUE),
+(108, 1, 'Spicy Ramen',         'Japanese noodle soup',              5.00, NULL, 'assets/images/Ramen.webp',         480, '15 min', 4.6, TRUE,  TRUE),
+(109, 1, 'Prahok Ktis',         'Minced pork with fermented fish',   4.00, NULL, 'assets/images/Brohok.webp',        400, '20 min', 4.3, FALSE, TRUE),
+(110, 1, 'Bai Sach Chrouk',     'Pork and rice breakfast',           2.00, NULL, 'assets/images/Bay sach jruk.webp', 450, '5 min',  4.5, FALSE, TRUE),
+(111, 1, 'Kralan',              'Bamboo sticky rice',                1.50, NULL, 'assets/images/krolan.webp',        200, '5 min',  4.2, FALSE, TRUE),
+(112, 1, 'Nom Banh Chok',       'Khmer noodles with fish gravy',     2.50, NULL, 'assets/images/Nom banh jok.webp',  300, '10 min', 4.5, FALSE, TRUE),
+(113, 1, 'Beef Tacos',          'Mexican street tacos',              3.50, 7.00, 'assets/images/Tacos.webp',         300, '10 min', 4.4, FALSE, TRUE),
+(114, 1, 'Pork Dumplings',      'Steamed meat dumplings',            2.00, 4.00, 'assets/images/dumpling.webp',      250, '15 min', 4.5, FALSE, TRUE),
+(115, 1, 'Dim Sum',             'Assorted Chinese bites',            4.00, 8.00, 'assets/images/dum sum.webp',       350, '20 min', 4.6, FALSE, TRUE);
 
 -- ============================================
--- DRINKS (category 2)
+-- DRINKS SEED DATA (category 2)
 -- ============================================
 INSERT INTO foods (food_id, category_id, food_name, description, price, original_price, image_url, calories, cooking_time, rating, is_popular, is_available) VALUES
-(201, 2, 'Fresh Lemonade',   'Cold refreshing drink',         1.00, 2.00, 'assets/images/lemonade.png',                 120, '2 min', 4.3, FALSE, TRUE),
-(202, 2, 'Iced Coffee',      'Sweet iced coffee',             1.75, 3.50, 'assets/images/iced latte.png',               200, '3 min', 4.5, TRUE,  TRUE),
-(203, 2, 'Coca Cola',        'Classic soda',                  0.75, 1.50, 'assets/images/coke.png',                     140, '1 min', 4.2, FALSE, TRUE),
-(204, 2, 'Brown Sugar Boba', 'Milk tea with sweet pearls',    2.00, 4.00, 'assets/images/Boba.png',                     350, '5 min', 4.7, TRUE,  TRUE),
-(205, 2, 'Mango Smoothie',   'Blended fresh mango',           1.50, 3.00, 'assets/images/smoothies.png',                250, '5 min', 4.5, FALSE, TRUE),
-(206, 2, 'Green Tea',        'Healthy hot green tea',         2.50, NULL, 'assets/images/green-tea.png',                  0, '3 min', 4.4, TRUE,  TRUE),
-(207, 2, 'Matcha Latte',     'Premium Japanese matcha',       4.50, NULL, 'assets/images/matcha-latte.png',             220, '5 min', 4.8, TRUE,  TRUE),
-(208, 2, 'Americano',        'Black coffee',                  2.50, NULL, 'assets/images/pngtree-americano-coffee-.png',  10, '3 min', 4.5, TRUE,  TRUE),
-(209, 2, 'Cappuccino',       'Espresso with milk foam',       3.50, NULL, 'assets/images/coffee-cappuccino.png',         150, '4 min', 4.6, TRUE,  TRUE),
-(210, 2, 'Orange Juice',     'Freshly squeezed',              3.00, NULL, 'assets/images/orange-juice.png',             110, '2 min', 4.5, TRUE,  TRUE),
-(211, 2, 'Apple Juice',      'Sweet apple juice',             2.50, NULL, 'assets/images/apple_juice.png',              100, '2 min', 4.3, FALSE, TRUE),
-(212, 2, 'Strawberry Shake', 'Thick creamy shake',            5.00, NULL, 'assets/images/milkshake.png',                500, '5 min', 4.6, FALSE, TRUE),
-(213, 2, 'Caramel Frappe',   'Blended coffee with caramel',   5.50, NULL, 'assets/images/frappe.png',                   550, '6 min', 4.7, FALSE, TRUE),
-(214, 2, 'Hot Mocha',        'Coffee mixed with chocolate',   4.00, NULL, 'assets/images/mocha.png',                    250, '4 min', 4.5, FALSE, TRUE),
-(215, 2, 'Hot Chocolate',    'Warm cocoa with marshmallows',  3.50, NULL, 'assets/images/hot_choco.png',                300, '5 min', 4.4, FALSE, TRUE),
-(216, 2, 'Fresh Coconut',    'Whole fresh coconut',           2.00, NULL, 'assets/images/coconut.png',                   50, '1 min', 4.5, TRUE,  TRUE),
-(217, 2, 'Passion Fruit',    'Sweet and sour tropical drink', 3.00, NULL, 'assets/images/passion_fruit_juice.png',      130, '3 min', 4.4, TRUE,  TRUE),
-(218, 2, 'Club Soda',        'Sparkling water',               1.00, NULL, 'assets/images/soda.png',                       0, '1 min', 4.0, FALSE, TRUE),
-(219, 2, 'Mineral Water',    'Bottled water',                 0.50, NULL, 'assets/images/water.png',                      0, '1 min', 4.0, FALSE, TRUE),
-(220, 2, 'Energy Drink',     'Red Bull energy',               2.50, NULL, 'assets/images/Energy_drink.png',             110, '1 min', 4.3, FALSE, TRUE);
+(201, 2, 'Fresh Lemonade',   'Cold refreshing drink',          1.00, 2.00, 'assets/images/lemonade.webp',                 120, '2 min', 4.3, FALSE, TRUE),
+(202, 2, 'Iced Coffee',      'Sweet iced coffee',              1.75, 3.50, 'assets/images/iced latte.webp',               200, '3 min', 4.5, TRUE,  TRUE),
+(203, 2, 'Coca Cola',        'Classic soda',                   0.75, 1.50, 'assets/images/coke.webp',                     140, '1 min', 4.2, FALSE, TRUE),
+(204, 2, 'Brown Sugar Boba', 'Milk tea with sweet pearls',     2.00, 4.00, 'assets/images/Boba.webp',                     350, '5 min', 4.7, TRUE,  TRUE),
+(205, 2, 'Mango Smoothie',   'Blended fresh mango',            1.50, 3.00, 'assets/images/smoothies.webp',                250, '5 min', 4.5, FALSE, TRUE),
+(206, 2, 'Green Tea',        'Healthy hot green tea',          2.50, NULL, 'assets/images/green-tea.webp',                  0, '3 min', 4.4, TRUE,  TRUE),
+(207, 2, 'Matcha Latte',     'Premium Japanese matcha',        4.50, NULL, 'assets/images/matcha-latte.webp',             220, '5 min', 4.8, TRUE,  TRUE),
+(208, 2, 'Americano',        'Black coffee',                   2.50, NULL, 'assets/images/pngtree-americano-coffee-.webp',  10, '3 min', 4.5, TRUE,  TRUE),
+(209, 2, 'Cappuccino',       'Espresso with milk foam',        3.50, NULL, 'assets/images/coffee-cappuccino.webp',         150, '4 min', 4.6, TRUE,  TRUE),
+(210, 2, 'Orange Juice',     'Freshly squeezed',               3.00, NULL, 'assets/images/orange-juice.webp',             110, '2 min', 4.5, TRUE,  TRUE),
+(211, 2, 'Apple Juice',      'Sweet apple juice',              2.50, NULL, 'assets/images/apple_juice.webp',              100, '2 min', 4.3, FALSE, TRUE),
+(212, 2, 'Strawberry Shake', 'Thick creamy shake',             5.00, NULL, 'assets/images/milkshake.webp',                500, '5 min', 4.6, FALSE, TRUE),
+(213, 2, 'Caramel Frappe',   'Blended coffee with caramel',    5.50, NULL, 'assets/images/frappe.webp',                   550, '6 min', 4.7, FALSE, TRUE),
+(214, 2, 'Hot Mocha',        'Coffee mixed with chocolate',    4.00, NULL, 'assets/images/mocha.webp',                    250, '4 min', 4.5, FALSE, TRUE),
+(215, 2, 'Hot Chocolate',    'Warm cocoa with marshmallows',   3.50, NULL, 'assets/images/hot_choco.webp',                300, '5 min', 4.4, FALSE, TRUE),
+(216, 2, 'Fresh Coconut',    'Whole fresh coconut',            2.00, NULL, 'assets/images/coconut.webp',                   50, '1 min', 4.5, TRUE,  TRUE),
+(217, 2, 'Passion Fruit',    'Sweet and sour tropical drink',  3.00, NULL, 'assets/images/passion_fruit_juice.webp',      130, '3 min', 4.4, TRUE,  TRUE),
+(218, 2, 'Club Soda',        'Sparkling water',                1.00, NULL, 'assets/images/soda.webp',                       0, '1 min', 4.0, FALSE, TRUE),
+(219, 2, 'Mineral Water',    'Bottled water',                  0.50, NULL, 'assets/images/water.webp',                      0, '1 min', 4.0, FALSE, TRUE),
+(220, 2, 'Energy Drink',     'Red Bull energy',                2.50, NULL, 'assets/images/Energy_drink.webp',             110, '1 min', 4.3, FALSE, TRUE);
 
 -- ============================================
--- DESSERTS (category 3)
+-- DESSERTS SEED DATA (category 3)
 -- ============================================
 INSERT INTO foods (food_id, category_id, food_name, description, price, original_price, image_url, calories, cooking_time, rating, is_popular, is_available) VALUES
-(301, 3, 'Strawberry Cake',    'Sweet and creamy dessert',        2.25, 4.50, 'assets/images/cake.png',       450, '10 min', 4.6, FALSE, TRUE),
-(302, 3, 'Vanilla Ice Cream',  'Two scoops of vanilla',           1.25, 2.50, 'assets/images/ice_cream.png',  300, '2 min',  4.5, FALSE, TRUE),
-(303, 3, 'Chocolate Brownie',  'Warm chocolate fudge',            1.50, 3.00, 'assets/images/brownie.png',    400, '5 min',  4.6, FALSE, TRUE),
-(304, 3, 'Pancakes',           'Fluffy pancakes with syrup',      2.00, 4.00, 'assets/images/pancakes.png',   350, '10 min', 4.5, FALSE, TRUE),
-(305, 3, 'Belgian Waffles',    'Crispy waffles with honey',       2.25, 4.50, 'assets/images/waffles.png',    380, '10 min', 4.6, FALSE, TRUE),
-(306, 3, 'NY Cheesecake',      'Classic creamy slice',            5.00, NULL, 'assets/images/cheesecake.png', 500, '5 min',  4.8, TRUE,  TRUE),
-(307, 3, 'Tiramisu',           'Italian coffee dessert',          5.50, NULL, 'assets/images/tiramisu.png',   450, '5 min',  4.8, TRUE,  TRUE),
-(308, 3, 'Macarons (3pcs)',    'French almond cookies',           6.00, NULL, 'assets/images/macarons.png',   200, '2 min',  4.7, TRUE,  TRUE),
-(309, 3, 'Glazed Donut',       'Sweet sugar ring',                1.50, NULL, 'assets/images/donut.png',      250, '2 min',  4.4, FALSE, TRUE),
-(310, 3, 'Churros',            'Fried dough with chocolate',      3.50, NULL, 'assets/images/churros.png',    350, '8 min',  4.5, FALSE, TRUE),
-(311, 3, 'Caramel Pudding',    'Soft flan dessert',               3.00, NULL, 'assets/images/pudding.png',    250, '5 min',  4.4, FALSE, TRUE),
-(312, 3, 'Fruit Tart',         'Crispy shell with fresh fruit',   4.00, NULL, 'assets/images/tart.png',       300, '5 min',  4.6, FALSE, TRUE),
-(313, 3, 'Mango Gelato',       'Italian style ice cream',         3.50, NULL, 'assets/images/gelato.png',     220, '3 min',  4.7, FALSE, TRUE),
-(314, 3, 'Chocolate Mousse',   'Light and airy chocolate',        4.50, NULL, 'assets/images/mousse.png',     350, '5 min',  4.7, FALSE, TRUE),
-(315, 3, 'Red Velvet Cupcake', 'Small cake with frosting',        2.50, NULL, 'assets/images/cupcake.png',    280, '3 min',  4.5, FALSE, TRUE),
-(316, 3, 'Lemon Sorbet',       'Dairy-free frozen treat',         2.50, NULL, 'assets/images/sorbet.png',     150, '3 min',  4.4, TRUE,  TRUE),
-(317, 3, 'Korean Bingsu',      'Shaved ice with sweet beans',     7.00, NULL, 'assets/images/bingsu.png',     500, '10 min', 4.8, TRUE,  TRUE),
-(318, 3, 'French Crepes',      'Thin pancake with Nutella',       4.50, NULL, 'assets/images/crepes.png',     400, '8 min',  4.6, TRUE,  TRUE),
-(319, 3, 'Chocolate Eclair',   'Cream-filled pastry',             3.50, NULL, 'assets/images/eclair.png',     300, '5 min',  4.5, TRUE,  TRUE),
-(320, 3, 'Choco Chip Cookies', 'Two warm cookies',                2.00, NULL, 'assets/images/cookies.png',    250, '3 min',  4.4, TRUE,  TRUE);
+(301, 3, 'Strawberry Cake',    'Sweet and creamy dessert',         2.25, 4.50, 'assets/images/cake.webp',       450, '10 min', 4.6, FALSE, TRUE),
+(302, 3, 'Vanilla Ice Cream',  'Two scoops of vanilla',            1.25, 2.50, 'assets/images/ice_cream.webp',  300, '2 min',  4.5, FALSE, TRUE),
+(303, 3, 'Chocolate Brownie',  'Warm chocolate fudge',             1.50, 3.00, 'assets/images/brownie.webp',    400, '5 min',  4.6, FALSE, TRUE),
+(304, 3, 'Pancakes',           'Fluffy pancakes with syrup',       2.00, 4.00, 'assets/images/pancakes.webp',   350, '10 min', 4.5, FALSE, TRUE),
+(305, 3, 'Belgian Waffles',    'Crispy waffles with honey',        2.25, 4.50, 'assets/images/waffles.webp',    380, '10 min', 4.6, FALSE, TRUE),
+(306, 3, 'NY Cheesecake',      'Classic creamy slice',             5.00, NULL, 'assets/images/cheesecake.webp', 500, '5 min',  4.8, TRUE,  TRUE),
+(307, 3, 'Tiramisu',           'Italian coffee dessert',           5.50, NULL, 'assets/images/tiramisu.webp',   450, '5 min',  4.8, TRUE,  TRUE),
+(308, 3, 'Macarons (3pcs)',    'French almond cookies',            6.00, NULL, 'assets/images/macarons.webp',   200, '2 min',  4.7, TRUE,  TRUE),
+(309, 3, 'Glazed Donut',       'Sweet sugar ring',                 1.50, NULL, 'assets/images/donut.webp',      250, '2 min',  4.4, FALSE, TRUE),
+(310, 3, 'Churros',            'Fried dough with chocolate',       3.50, NULL, 'assets/images/churros.webp',    350, '8 min',  4.5, FALSE, TRUE),
+(311, 3, 'Caramel Pudding',    'Soft flan dessert',                3.00, NULL, 'assets/images/pudding.webp',    250, '5 min',  4.4, FALSE, TRUE),
+(312, 3, 'Fruit Tart',         'Crispy shell with fresh fruit',    4.00, NULL, 'assets/images/tart.webp',       300, '5 min',  4.6, FALSE, TRUE),
+(313, 3, 'Mango Gelato',       'Italian style ice cream',          3.50, NULL, 'assets/images/gelato.webp',     220, '3 min',  4.7, FALSE, TRUE),
+(314, 3, 'Chocolate Mousse',   'Light and airy chocolate',         4.50, NULL, 'assets/images/mousse.webp',     350, '5 min',  4.7, FALSE, TRUE),
+(315, 3, 'Red Velvet Cupcake', 'Small cake with frosting',         2.50, NULL, 'assets/images/cupcake.webp',    280, '3 min',  4.5, FALSE, TRUE),
+(316, 3, 'Lemon Sorbet',       'Dairy-free frozen treat',          2.50, NULL, 'assets/images/sorbet.webp',     150, '3 min',  4.4, TRUE,  TRUE),
+(317, 3, 'Korean Bingsu',      'Shaved ice with sweet beans',      7.00, NULL, 'assets/images/bingsu.webp',     500, '10 min', 4.8, TRUE,  TRUE),
+(318, 3, 'French Crepes',      'Thin pancake with Nutella',        4.50, NULL, 'assets/images/crepes.webp',     400, '8 min',  4.6, TRUE,  TRUE),
+(319, 3, 'Chocolate Eclair',   'Cream-filled pastry',              3.50, NULL, 'assets/images/eclair.webp',     300, '5 min',  4.5, TRUE,  TRUE),
+(320, 3, 'Choco Chip Cookies', 'Two warm cookies',                 2.00, NULL, 'assets/images/cookies.webp',    250, '3 min',  4.4, TRUE,  TRUE);
 
 -- ============================================
--- SNACKS (category 4)
+-- SNACKS SEED DATA (category 4)
 -- ============================================
 INSERT INTO foods (food_id, category_id, food_name, description, price, original_price, image_url, calories, cooking_time, rating, is_popular, is_available) VALUES
-(401, 4, 'Crispy Fries',      'Hot salty french fries',        1.50, 3.00, 'assets/images/fries.png',        300, '10 min', 4.6, FALSE, TRUE),
-(402, 4, 'Cheese Nachos',     'Chips with melted cheese',      2.25, 4.50, 'assets/images/nachos.png',       400, '10 min', 4.5, FALSE, TRUE),
-(403, 4, 'Onion Rings',       'Deep fried onion rings',        1.75, 3.50, 'assets/images/onion_rings.png',  350, '15 min', 4.4, FALSE, TRUE),
-(404, 4, 'Movie Popcorn',     'Buttery popcorn',               1.00, 2.00, 'assets/images/popcorn.png',      200, '5 min',  4.3, FALSE, TRUE),
-(405, 4, 'Potato Chips',      'Crunchy salted chips',          0.75, 1.50, 'assets/images/chips.png',        150, '2 min',  4.2, FALSE, TRUE),
-(406, 4, 'Soft Pretzel',      'Warm salted pretzel',           3.00, NULL, 'assets/images/pretzel.png',      280, '5 min',  4.4, TRUE,  TRUE),
-(407, 4, 'Chicken Nuggets',   '6 piece golden nuggets',        4.50, NULL, 'assets/images/nuggets.png',      380, '10 min', 4.7, TRUE,  TRUE),
-(408, 4, 'Mozzarella Sticks', 'Fried cheese with marinara',    5.00, NULL, 'assets/images/mozzarella.png',   450, '12 min', 4.6, TRUE,  TRUE),
-(409, 4, 'Garlic Bread',      'Toasted buttery bread',         3.50, NULL, 'assets/images/garlic_bread.png', 300, '8 min',  4.5, FALSE, TRUE),
-(410, 4, 'Spring Rolls',      'Crispy veggie rolls',           4.00, NULL, 'assets/images/spring_rolls.png', 250, '10 min', 4.6, FALSE, TRUE),
-(411, 4, 'Meat Samosa',       'Fried pastry with filling',     3.50, NULL, 'assets/images/samosa.png',       350, '12 min', 4.5, FALSE, TRUE),
-(412, 4, 'Edamame',           'Steamed soybeans with salt',    3.00, NULL, 'assets/images/edamame.png',      120, '5 min',  4.4, FALSE, TRUE),
-(413, 4, 'Cheese Crackers',   'Baked snack crackers',          2.00, NULL, 'assets/images/crackers.png',     180, '2 min',  4.2, FALSE, TRUE),
-(414, 4, 'Roasted Nuts',      'Mixed salted nuts',             4.00, NULL, 'assets/images/roasted_nuts.png', 400, '2 min',  4.4, FALSE, TRUE),
-(415, 4, 'Dried Fruit Mix',   'Healthy dried fruits',          3.50, NULL, 'assets/images/dried_fruit.png',  250, '2 min',  4.3, FALSE, TRUE),
-(416, 4, 'Potato Wedges',     'Thick cut seasoned fries',      3.50, NULL, 'assets/images/wedges.png',       320, '15 min', 4.5, TRUE,  TRUE),
-(417, 4, 'Corn Dog',          'Fried sausage on a stick',      2.50, NULL, 'assets/images/corn_dog.png',     300, '10 min', 4.4, TRUE,  TRUE),
-(418, 4, 'Hash Browns',       'Crispy fried potato',           2.00, NULL, 'assets/images/hash_browns.png',  250, '8 min',  4.3, TRUE,  TRUE),
-(419, 4, 'Tater Tots',        'Bite-sized potato puffs',       3.00, NULL, 'assets/images/tater_tots.png',   280, '10 min', 4.4, TRUE,  TRUE),
-(420, 4, 'Beef Jerky',        'Dried and seasoned beef',       6.00, NULL, 'assets/images/beef_jerky.png',   200, '2 min',  4.5, TRUE,  TRUE);
+(401, 4, 'Crispy Fries',      'Hot salty french fries',         1.50, 3.00, 'assets/images/fries.webp',        300, '10 min', 4.6, FALSE, TRUE),
+(402, 4, 'Cheese Nachos',     'Chips with melted cheese',       2.25, 4.50, 'assets/images/nachos.webp',       400, '10 min', 4.5, FALSE, TRUE),
+(403, 4, 'Onion Rings',       'Deep fried onion rings',         1.75, 3.50, 'assets/images/onion_rings.webp',  350, '15 min', 4.4, FALSE, TRUE),
+(404, 4, 'Movie Popcorn',     'Buttery popcorn',                1.00, 2.00, 'assets/images/popcorn.webp',      200, '5 min',  4.3, FALSE, TRUE),
+(405, 4, 'Potato Chips',      'Crunchy salted chips',           0.75, 1.50, 'assets/images/chips.webp',        150, '2 min',  4.2, FALSE, TRUE),
+(406, 4, 'Soft Pretzel',      'Warm salted pretzel',            3.00, NULL, 'assets/images/pretzel.webp',      280, '5 min',  4.4, TRUE,  TRUE),
+(407, 4, 'Chicken Nuggets',   '6 piece golden nuggets',         4.50, NULL, 'assets/images/nuggets.webp',      380, '10 min', 4.7, TRUE,  TRUE),
+(408, 4, 'Mozzarella Sticks', 'Fried cheese with marinara',     5.00, NULL, 'assets/images/mozzarella.webp',   450, '12 min', 4.6, TRUE,  TRUE),
+(409, 4, 'Garlic Bread',      'Toasted buttery bread',          3.50, NULL, 'assets/images/garlic_bread.webp', 300, '8 min',  4.5, FALSE, TRUE),
+(410, 4, 'Spring Rolls',      'Crispy veggie rolls',            4.00, NULL, 'assets/images/spring_rolls.webp', 250, '10 min', 4.6, FALSE, TRUE),
+(411, 4, 'Meat Samosa',       'Fried pastry with filling',      3.50, NULL, 'assets/images/samosa.webp',       350, '12 min', 4.5, FALSE, TRUE),
+(412, 4, 'Edamame',           'Steamed soybeans with salt',     3.00, NULL, 'assets/images/edamame.webp',      120, '5 min',  4.4, FALSE, TRUE),
+(413, 4, 'Cheese Crackers',   'Baked snack crackers',           2.00, NULL, 'assets/images/crackers.webp',     180, '2 min',  4.2, FALSE, TRUE),
+(414, 4, 'Roasted Nuts',      'Mixed salted nuts',              4.00, NULL, 'assets/images/roasted_nuts.webp', 400, '2 min',  4.4, FALSE, TRUE),
+(415, 4, 'Dried Fruit Mix',   'Healthy dried fruits',           3.50, NULL, 'assets/images/dried_fruit.webp',  250, '2 min',  4.3, FALSE, TRUE),
+(416, 4, 'Potato Wedges',     'Thick cut seasoned fries',       3.50, NULL, 'assets/images/wedges.webp',       320, '15 min', 4.5, TRUE,  TRUE),
+(417, 4, 'Corn Dog',          'Fried sausage on a stick',       2.50, NULL, 'assets/images/corn_dog.webp',     300, '10 min', 4.4, TRUE,  TRUE),
+(418, 4, 'Hash Browns',       'Crispy fried potato',            2.00, NULL, 'assets/images/hash_browns.webp',  250, '8 min',  4.3, TRUE,  TRUE),
+(419, 4, 'Tater Tots',        'Bite-sized potato puffs',        3.00, NULL, 'assets/images/tater_tots.webp',   280, '10 min', 4.4, TRUE,  TRUE),
+(420, 4, 'Beef Jerky',        'Dried and seasoned beef',        6.00, NULL, 'assets/images/beef_jerky.webp',   200, '2 min',  4.5, TRUE,  TRUE);
 
 SELECT setval('foods_food_id_seq', (SELECT MAX(food_id) FROM foods));
 

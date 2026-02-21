@@ -72,7 +72,7 @@
                     "request": {
                         "method": "POST",
                         "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }, { "key": "Content-Type", "value": "application/json" }],
-                        "body": { "mode": "raw", "raw": "{\n    \"name\": \"Food\",\n    \"description\": \"Delicious main dishes\",\n    \"icon\": \"food_icon.png\",\n    \"color\": \"#FF6B6B\",\n    \"display_order\": 1,\n    \"is_active\": true\n}" },
+                        "body": { "mode": "raw", "raw": "{\n    \"name\": \"Food\",\n    \"description\": \"Delicious main dishes\",\n    \"icon\": \"food_icon.webp\",\n    \"color\": \"#FF6B6B\",\n    \"display_order\": 1,\n    \"is_active\": true\n}" },
                         "url": { "raw": "{{base_url}}/api/categories", "host": ["{{base_url}}"], "path": ["api","categories"] }
                     }
                 },
@@ -127,7 +127,7 @@
                     "request": {
                         "method": "POST",
                         "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }, { "key": "Content-Type", "value": "application/json" }],
-                        "body": { "mode": "raw", "raw": "{\n    \"food_name\": \"Cambodia Fish Amork\",\n    \"category_id\": 1,\n    \"description\": \"Traditional Cambodian fish dish\",\n    \"price\": 6.00,\n    \"original_price\": null,\n    \"calories\": 350,\n    \"cooking_time\": \"25 min\",\n    \"image_url\": \"assets/images/amork.png\",\n    \"is_popular\": true,\n    \"is_available\": true\n}" },
+                        "body": { "mode": "raw", "raw": "{\n    \"food_name\": \"Cambodia Fish Amork\",\n    \"category_id\": 1,\n    \"description\": \"Traditional Cambodian fish dish\",\n    \"price\": 6.00,\n    \"original_price\": null,\n    \"calories\": 350,\n    \"cooking_time\": \"25 min\",\n    \"image_url\": \"assets/images/amork.webp\",\n    \"is_popular\": true,\n    \"is_available\": true\n}" },
                         "url": { "raw": "{{base_url}}/api/foods", "host": ["{{base_url}}"], "path": ["api","foods"] }
                     }
                 },

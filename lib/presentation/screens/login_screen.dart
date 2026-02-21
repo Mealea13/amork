@@ -349,7 +349,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
-                              'assets/images/google_icon.png',
+                              'assets/images/google_icon.webp',
                               width: 24,
                               height: 24,
                               errorBuilder: (context, error, stackTrace) {

@@ -120,7 +120,7 @@ class _QRPaymentScreenState extends State<QRPaymentScreen> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Image.asset(
-                      "assets/images/mealea-qr.png",
+                      "assets/images/mealea-qr.webp",
                       height: 350,
                       width: double.infinity,
                       fit: BoxFit.contain,

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AmorkApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+40ddf6c4fe30c8f63f5874a64b828c4615bf771d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+df9634acf0d5bb21267bec89fea298ec735f9d46")]
 [assembly: System.Reflection.AssemblyProductAttribute("AmorkApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AmorkApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
